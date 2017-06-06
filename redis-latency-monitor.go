@@ -124,7 +124,7 @@ func connect() {
 		shutdown(1)
 	}
 
-	log.Info("Connected to Redis")
+	log.Info("Successfully connected to Redis")
 
 	if options.GetS(OPT_AUTH) != "" {
 		conn.Write([]byte("AUTH " + options.GetS(OPT_AUTH) + "\n"))
@@ -188,7 +188,10 @@ func measure() {
 
 // shutdown close connection to Redis and exit from utility
 func shutdown(code int) {
-	conn.Close()
+	if conn != nil {
+		conn.Close()
+	}
+
 	log.Flush()
 	os.Exit(1)
 }
