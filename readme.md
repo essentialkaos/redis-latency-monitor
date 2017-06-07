@@ -53,6 +53,7 @@ Options
   --port, -P port            Server port (6379 by default)
   --password, -a password    Password to use when connecting to the server
   --timeout, -t 1-300        Connection timeout in seconds (3 by default)
+  --interval, -i 1-3600      Interval in seconds (60 by default)
   --output, -o               Path to output file
   --no-color, -nc            Disable colors in output
   --help, -h                 Show this help message
