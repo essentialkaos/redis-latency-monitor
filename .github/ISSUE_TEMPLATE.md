@@ -9,7 +9,7 @@ _Before opening an issue, search for similar bug reports or feature requests on 
 * **Kernel (`uname -a`):** 
 * **Install tools:** 
 
-**System info:**
+**Steps to reproduce:**
 
 1. [First Step]
 2. [Second Step]
