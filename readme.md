@@ -1,4 +1,4 @@
-## Redis CLI Monitor [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.org/essentialkaos/redis-latency-monitor) [![Go Report Card](https://goreportcard.com/badge/github.com/essentialkaos/redis-latency-monitor)](https://goreportcard.com/report/github.com/essentialkaos/redis-latency-monitor) [![License](https://gh.kaos.io/ekol.svg)](https://essentialkaos.com/ekol)
+## Redis Latency Monitor [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.org/essentialkaos/redis-latency-monitor) [![Go Report Card](https://goreportcard.com/badge/github.com/essentialkaos/redis-latency-monitor)](https://goreportcard.com/report/github.com/essentialkaos/redis-latency-monitor) [![License](https://gh.kaos.io/ekol.svg)](https://essentialkaos.com/ekol)
 
 Tiny Redis client for latency measurement.
 
