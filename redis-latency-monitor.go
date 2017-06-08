@@ -29,7 +29,7 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "1.0.0"
+	VER  = "1.0.1"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -151,10 +151,7 @@ func measure() {
 	pretty := !options.Has(OPT_OUTPUT)
 
 	if pretty {
-		table.HeaderCapitalize = true
-		t = table.NewTable("Date & Time", "Samples", "Min", "Max", "Mean", "Median", "StdDev", "Perc 95", "Perc 99")
-		t.SetSizes(23, 8, 8, 8, 8, 8, 8, 8)
-		t.SetAlignments(2, 2, 2, 2, 2, 2, 2, 2)
+		t = createOutputTable()
 	}
 
 	last := time.Now()
@@ -233,6 +230,24 @@ func printMeasurements(t *table.Table, measurements []float64, pretty bool) {
 			len(measurements), min, max, men, med, mgh, sdv, p95, p99,
 		)
 	}
+}
+
+// createOutputTable create and configure output table struct
+func createOutputTable() *table.Table {
+	t := table.NewTable(
+		"DATE & TIME", "SAMPLES", "MIN", "MAX",
+		"MEAN", "MEDIAN", "STDDEV", "PERC 95", "PERC 99",
+	)
+
+	t.SetSizes(23, 8, 8, 8, 8, 8, 8, 8)
+
+	t.SetAlignments(
+		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
+		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
+		table.ALIGN_RIGHT, table.ALIGN_RIGHT,
+	)
+
+	return t
 }
 
 // printErrorAndExit print error message and exit from utility
