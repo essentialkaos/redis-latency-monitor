@@ -29,7 +29,7 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "1.0.1"
+	VER  = "1.0.2"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -213,20 +213,20 @@ func printMeasurements(t *table.Table, measurements []float64, pretty bool) {
 
 	if pretty {
 		t.Print(
-			timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
+			timeutil.Format(time.Now(), "%H:%M:%S.%K"),
 			fmt.Sprintf("%d", len(measurements)),
-			fmt.Sprintf("%.03gms", min),
-			fmt.Sprintf("%.03gms", max),
-			fmt.Sprintf("%.03gms", men),
-			fmt.Sprintf("%.03gms", med),
-			fmt.Sprintf("%.03gms", mgh),
-			fmt.Sprintf("%.03gms", sdv),
-			fmt.Sprintf("%.03gms", p95),
-			fmt.Sprintf("%.03gms", p99),
+			fmt.Sprintf("%.03g", min),
+			fmt.Sprintf("%.03g", max),
+			fmt.Sprintf("%.03g", men),
+			fmt.Sprintf("%.03g", med),
+			fmt.Sprintf("%.03g", mgh),
+			fmt.Sprintf("%.03g", sdv),
+			fmt.Sprintf("%.03g", p95),
+			fmt.Sprintf("%.03g", p99),
 		)
 	} else {
 		log.Info(
-			"Samples: %d | Min: %5.03gms | Max: %5.03gms | Mean: %5.03gms | Median: %5.03gms | Midhinge: %5.03gms | StdDev: %5.03gms | Perc95: %5.03gms | Perc99: %5.03gms",
+			"Samples: %d | Min: %5.03g | Max: %5.03g | Mean: %5.03g | Median: %5.03g | Midhinge: %5.03g | StdDev: %5.03g | Perc95: %5.03g | Perc99: %5.03g",
 			len(measurements), min, max, men, med, mgh, sdv, p95, p99,
 		)
 	}
@@ -235,11 +235,11 @@ func printMeasurements(t *table.Table, measurements []float64, pretty bool) {
 // createOutputTable create and configure output table struct
 func createOutputTable() *table.Table {
 	t := table.NewTable(
-		"DATE & TIME", "SAMPLES", "MIN", "MAX",
-		"MEAN", "MEDIAN", "STDDEV", "PERC 95", "PERC 99",
+		"TIME", "SAMPLES", "MIN", "MAX", "MEAN",
+		"MEDIAN", "STDDEV", "PERC 95", "PERC 99",
 	)
 
-	t.SetSizes(23, 8, 8, 8, 8, 8, 8, 8)
+	t.SetSizes(12, 8, 8, 8, 8, 8, 8, 8)
 
 	t.SetAlignments(
 		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
@@ -284,6 +284,8 @@ func shutdown(code int) {
 // showUsage print usage info
 func showUsage() {
 	info := usage.NewInfo("")
+
+	info.AddSpoiler("Utility show PING command latency in milliseconds (one thousandth of a second)")
 
 	info.AddOption(OPT_HOST, "Server hostname {s-}(127.0.0.1 by default){!}", "ip/host")
 	info.AddOption(OPT_PORT, "Server port {s-}(6379 by default){!}", "port")

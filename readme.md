@@ -4,7 +4,7 @@ Tiny Redis client for latency measurement.
 
 ### Usage demo
 
-[![demo](https://gh.kaos.io/redis-latency-monitor-101.gif)](#usage-demo)
+[![demo](https://gh.kaos.io/redis-latency-monitor-102.gif)](#usage-demo)
 
 ### Installation
 
