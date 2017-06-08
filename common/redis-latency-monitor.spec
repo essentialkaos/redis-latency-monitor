@@ -58,7 +58,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Fri Jun 09 2017 Anton Novojilov <andy@essentialkaos.com> - 1.0.2-0
-- Improved output
+- Improved UI
 
 * Thu Jun 08 2017 Anton Novojilov <andy@essentialkaos.com> - 1.0.1-0
 - Minor improvements
