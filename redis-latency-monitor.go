@@ -9,13 +9,15 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"io"
+	"math"
 	"net"
 	"os"
+	"runtime"
 	"time"
 
 	"pkg.re/essentialkaos/ek.v9/fmtc"
+	"pkg.re/essentialkaos/ek.v9/fmtutil"
 	"pkg.re/essentialkaos/ek.v9/fmtutil/table"
 	"pkg.re/essentialkaos/ek.v9/log"
 	"pkg.re/essentialkaos/ek.v9/options"
@@ -29,8 +31,12 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "1.0.2"
+	VER  = "1.1.0"
 	DESC = "Tiny Redis client for latency measurement"
+)
+
+const (
+	LATENCY_SAMPLE_RATE = 10 // milliseconds
 )
 
 const (
@@ -67,6 +73,8 @@ var conn net.Conn
 
 // main is main function
 func main() {
+	runtime.GOMAXPROCS(4)
+
 	_, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -181,7 +189,7 @@ func measure() {
 			measurements = nil
 		}
 
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(LATENCY_SAMPLE_RATE * time.Millisecond)
 	}
 }
 
@@ -198,6 +206,8 @@ func execCommand(buf *bufio.Reader) {
 	if err != nil && err != io.EOF {
 		printErrorAndExit("Can't read Redis response: %v", err)
 	}
+
+	buf.Discard(-1)
 }
 
 // printMeasurements calculate and print measurements
@@ -214,22 +224,31 @@ func printMeasurements(t *table.Table, measurements []float64, pretty bool) {
 	if pretty {
 		t.Print(
 			timeutil.Format(time.Now(), "%H:%M:%S.%K"),
-			fmt.Sprintf("%d", len(measurements)),
-			fmt.Sprintf("%.03g", min),
-			fmt.Sprintf("%.03g", max),
-			fmt.Sprintf("%.03g", men),
-			fmt.Sprintf("%.03g", med),
-			fmt.Sprintf("%.03g", mgh),
-			fmt.Sprintf("%.03g", sdv),
-			fmt.Sprintf("%.03g", p95),
-			fmt.Sprintf("%.03g", p99),
+			fmtutil.PrettyNum(len(measurements)),
+			formatNumber(min), formatNumber(max),
+			formatNumber(men), formatNumber(med),
+			formatNumber(mgh), formatNumber(sdv),
+			formatNumber(p95), formatNumber(p99),
 		)
 	} else {
 		log.Info(
-			"Samples: %d | Min: %5.03g | Max: %5.03g | Mean: %5.03g | Median: %5.03g | Midhinge: %5.03g | StdDev: %5.03g | Perc95: %5.03g | Perc99: %5.03g",
-			len(measurements), min, max, men, med, mgh, sdv, p95, p99,
+			"Samples: %s | Min: %6s | Max: %6s | Mean: %6s | Median: %6s | Midhinge: %6s | StdDev: %6s | Perc95: %6s | Perc99: %6s",
+			fmtutil.PrettyNum(len(measurements)),
+			formatNumber(min), formatNumber(max),
+			formatNumber(men), formatNumber(med),
+			formatNumber(mgh), formatNumber(sdv),
+			formatNumber(p95), formatNumber(p99),
 		)
 	}
+}
+
+// formatNumber format floating number
+func formatNumber(value float64) string {
+	if math.IsNaN(value) {
+		return "------"
+	}
+
+	return fmtutil.PrettyNum(value)
 }
 
 // createOutputTable create and configure output table struct
