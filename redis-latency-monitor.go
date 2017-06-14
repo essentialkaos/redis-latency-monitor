@@ -66,6 +66,9 @@ var optMap = options.Map{
 	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
 }
 
+// pingCommand is PING command data
+var pingCommand = []byte("PING\r\n")
+
 // conn is connection to Redis
 var conn net.Conn
 
@@ -152,6 +155,7 @@ func measure() {
 	var measurements []float64
 	var t *table.Table
 	var count int
+	var pointer int
 
 	buf := bufio.NewReader(conn)
 	interval := time.Duration(options.GetI(OPT_INTERVAL)) * time.Second
@@ -164,18 +168,21 @@ func measure() {
 
 	last := time.Now()
 
+	measurements = make([]float64, (options.GetI(OPT_INTERVAL)*1000)/LATENCY_SAMPLE_RATE)
+	pointer = 0
+
 	for {
 		start := time.Now()
 
 		execCommand(buf)
 
 		dur := float64(time.Since(start)) / float64(time.Millisecond)
-		measurements = append(measurements, dur)
+		measurements[pointer] = dur
 
 		if time.Since(last) >= interval {
 			last = start
 
-			printMeasurements(t, measurements, pretty)
+			printMeasurements(t, measurements[:pointer], pretty)
 
 			if pretty {
 				count++
@@ -186,7 +193,9 @@ func measure() {
 				}
 			}
 
-			measurements = nil
+			pointer = 0
+		} else {
+			pointer++
 		}
 
 		time.Sleep(LATENCY_SAMPLE_RATE * time.Millisecond)
@@ -195,7 +204,7 @@ func measure() {
 
 // execCommand execute command and read output
 func execCommand(buf *bufio.Reader) {
-	_, err := conn.Write([]byte("PING\n"))
+	_, err := conn.Write(pingCommand)
 
 	if err != nil {
 		printErrorAndExit("Can't send PING command to Redis: %v", err)
@@ -206,8 +215,6 @@ func execCommand(buf *bufio.Reader) {
 	if err != nil && err != io.EOF {
 		printErrorAndExit("Can't read Redis response: %v", err)
 	}
-
-	buf.Discard(-1)
 }
 
 // printMeasurements calculate and print measurements
@@ -246,6 +253,10 @@ func printMeasurements(t *table.Table, measurements []float64, pretty bool) {
 func formatNumber(value float64) string {
 	if math.IsNaN(value) {
 		return "------"
+	}
+
+	if value == 0.0 {
+		return "0.001"
 	}
 
 	return fmtutil.PrettyNum(value)
