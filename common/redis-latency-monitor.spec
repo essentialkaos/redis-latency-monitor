@@ -58,6 +58,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Wed Jun 14 2017 Anton Novojilov <andy@essentialkaos.com> - 1.1.0-0
+- Measurements slice reusage
 - Improved UI and log output
 
 * Fri Jun 09 2017 Anton Novojilov <andy@essentialkaos.com> - 1.0.2-0
