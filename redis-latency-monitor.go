@@ -298,6 +298,10 @@ func formatNumber(value float64) string {
 		return "0{s-}.001{!}"
 	}
 
+	if value > 1000.0 {
+		value = math.Floor(value)
+	}
+
 	return strings.Replace(fmtutil.PrettyNum(value), ".", "{s-}.", -1) + "{!}"
 }
 
@@ -308,7 +312,7 @@ func createOutputTable() *table.Table {
 		"MEDIAN", "STDDEV", "PERC 95", "PERC 99",
 	)
 
-	t.SetSizes(12, 8, 8, 8, 8, 8, 8, 8)
+	t.SetSizes(12, 8, 8, 8, 10, 8, 8, 8)
 
 	t.SetAlignments(
 		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
