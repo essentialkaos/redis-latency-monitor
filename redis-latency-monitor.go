@@ -9,6 +9,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"math"
 	"net"
@@ -19,7 +20,6 @@ import (
 	"pkg.re/essentialkaos/ek.v9/fmtc"
 	"pkg.re/essentialkaos/ek.v9/fmtutil"
 	"pkg.re/essentialkaos/ek.v9/fmtutil/table"
-	"pkg.re/essentialkaos/ek.v9/log"
 	"pkg.re/essentialkaos/ek.v9/options"
 	"pkg.re/essentialkaos/ek.v9/timeutil"
 	"pkg.re/essentialkaos/ek.v9/usage"
@@ -31,12 +31,13 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "1.1.0"
+	VER  = "2.0.0"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
 const (
-	LATENCY_SAMPLE_RATE = 10 // milliseconds
+	LATENCY_SAMPLE_RATE int = 10
+	CONNECT_SAMPLE_RATE     = 100
 )
 
 const (
@@ -45,6 +46,7 @@ const (
 	OPT_AUTH     = "a:password"
 	OPT_TIMEOUT  = "t:timeout"
 	OPT_INTERVAL = "i:interval"
+	OPT_CONNECT  = "c:connect"
 	OPT_OUTPUT   = "o:output"
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
@@ -57,6 +59,7 @@ const (
 var optMap = options.Map{
 	OPT_HOST:     {Value: "127.0.0.1"},
 	OPT_PORT:     {Value: "6379"},
+	OPT_CONNECT:  {Type: options.BOOL},
 	OPT_TIMEOUT:  {Type: options.INT, Value: 3, Min: 1, Max: 300},
 	OPT_AUTH:     {},
 	OPT_INTERVAL: {Type: options.INT, Value: 60, Min: 1, Max: 3600},
@@ -69,8 +72,12 @@ var optMap = options.Map{
 // pingCommand is PING command data
 var pingCommand = []byte("PING\r\n")
 
-// conn is connection to Redis
-var conn net.Conn
+var (
+	conn         net.Conn
+	host         string
+	timeout      time.Duration
+	outputWriter *bufio.Writer
+)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -102,37 +109,44 @@ func main() {
 		return
 	}
 
-	setupLogger()
-	connect()
+	startMeasurementProcess()
 }
 
-// setupLogger setup logger
-func setupLogger() {
-	if !options.Has(OPT_OUTPUT) {
-		log.Set("/dev/null", 0)
-		return
+// startMeasurementProcess start measurement process
+func startMeasurementProcess() {
+	prettyOutput := !options.Has(OPT_OUTPUT)
+	interval := time.Duration(options.GetI(OPT_INTERVAL)) * time.Second
+
+	host = options.GetS(OPT_HOST) + ":" + options.GetS(OPT_PORT)
+	timeout = time.Second * time.Duration(options.GetI(OPT_TIMEOUT))
+
+	if !options.GetB(OPT_CONNECT) {
+		connectToRedis()
 	}
 
-	err := log.Set(options.GetS(OPT_OUTPUT), 0644)
+	if options.Has(OPT_OUTPUT) {
+		createOutputWriter()
+	}
+
+	measureLatency(interval, prettyOutput)
+}
+
+// createOutputWriter create and open file for writing data
+func createOutputWriter() {
+	fd, err := os.OpenFile(options.GetS(OPT_OUTPUT), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 
 	if err != nil {
-		printError(err.Error())
-		os.Exit(1)
+		printErrorAndExit(err.Error())
 	}
 
-	log.EnableBufIO(250 * time.Millisecond)
+	outputWriter = bufio.NewWriter(fd)
+
+	go flushOutput(250 * time.Millisecond)
 }
 
-// connect connect to Readis and start measurement loop
-func connect() {
+// connectToRedis connect to redis instance
+func connectToRedis() {
 	var err error
-
-	log.Aux("%s %s started", APP, VER)
-
-	host := options.GetS(OPT_HOST) + ":" + options.GetS(OPT_PORT)
-	timeout := time.Second * time.Duration(options.GetI(OPT_TIMEOUT))
-
-	log.Info("Connecting to %s with %v timeout", host, timeout)
 
 	conn, err = net.DialTimeout("tcp", host, timeout)
 
@@ -140,41 +154,48 @@ func connect() {
 		printErrorAndExit(err.Error())
 	}
 
-	log.Info("Successfully connected to Redis")
-
 	if options.GetS(OPT_AUTH) != "" {
 		conn.Write([]byte("AUTH " + options.GetS(OPT_AUTH) + "\n"))
-		log.Info("Authentication command sent to Redis")
 	}
-
-	measure()
 }
 
-// measure measure latency
-func measure() {
-	var measurements []float64
-	var t *table.Table
-	var count int
-	var pointer int
+// measureLatency measure latency
+func measureLatency(interval time.Duration, prettyOutput bool) {
+	var (
+		measurements   []float64
+		count, pointer int
+		t              *table.Table
+		sampleRate     int
+		errors         int
+		buf            *bufio.Reader
+	)
 
-	buf := bufio.NewReader(conn)
-	interval := time.Duration(options.GetI(OPT_INTERVAL)) * time.Second
-
-	pretty := !options.Has(OPT_OUTPUT)
-
-	if pretty {
+	if prettyOutput {
 		t = createOutputTable()
 	}
 
-	last := time.Now()
+	connect := options.GetB(OPT_CONNECT)
 
-	measurements = make([]float64, (options.GetI(OPT_INTERVAL)*1000)/LATENCY_SAMPLE_RATE)
-	pointer = 0
+	if connect {
+		sampleRate = CONNECT_SAMPLE_RATE
+	} else {
+		sampleRate = LATENCY_SAMPLE_RATE
+		buf = bufio.NewReader(conn)
+	}
+
+	last := time.Now()
+	measurements = createMeasurementsSlice(sampleRate)
 
 	for {
+		time.Sleep(time.Duration(sampleRate) * time.Millisecond)
+
 		start := time.Now()
 
-		execCommand(buf)
+		if connect {
+			errors += makeConnection()
+		} else {
+			errors += execCommand(buf)
+		}
 
 		dur := float64(time.Since(start)) / float64(time.Millisecond)
 		measurements[pointer] = dur
@@ -182,9 +203,9 @@ func measure() {
 		if time.Since(last) >= interval {
 			last = start
 
-			printMeasurements(t, measurements[:pointer], pretty)
+			printMeasurements(t, errors, measurements[:pointer], prettyOutput)
 
-			if pretty {
+			if prettyOutput {
 				count++
 
 				if count == 10 {
@@ -193,32 +214,48 @@ func measure() {
 				}
 			}
 
+			errors = 0
 			pointer = 0
 		} else {
 			pointer++
 		}
-
-		time.Sleep(LATENCY_SAMPLE_RATE * time.Millisecond)
 	}
 }
 
 // execCommand execute command and read output
-func execCommand(buf *bufio.Reader) {
+func execCommand(buf *bufio.Reader) int {
 	_, err := conn.Write(pingCommand)
 
 	if err != nil {
-		printErrorAndExit("Can't send PING command to Redis: %v", err)
+		return 1
 	}
 
 	_, err = buf.ReadString('\n')
 
 	if err != nil && err != io.EOF {
-		printErrorAndExit("Can't read Redis response: %v", err)
+		return 1
 	}
+
+	return 0
+}
+
+// makeConnection create and close connection to Redis
+func makeConnection() int {
+	var err error
+
+	conn, err = net.DialTimeout("tcp", host, timeout)
+
+	if err != nil {
+		return 1
+	}
+
+	conn.Close()
+
+	return 0
 }
 
 // printMeasurements calculate and print measurements
-func printMeasurements(t *table.Table, measurements []float64, pretty bool) {
+func printMeasurements(t *table.Table, errors int, measurements []float64, prettyOutput bool) {
 	min, _ := stats.Min(measurements)
 	max, _ := stats.Max(measurements)
 	men, _ := stats.Mean(measurements)
@@ -228,23 +265,24 @@ func printMeasurements(t *table.Table, measurements []float64, pretty bool) {
 	p95, _ := stats.Percentile(measurements, 95.0)
 	p99, _ := stats.Percentile(measurements, 99.0)
 
-	if pretty {
+	if prettyOutput {
 		t.Print(
 			timeutil.Format(time.Now(), "%H:%M:%S.%K"),
 			fmtutil.PrettyNum(len(measurements)),
+			fmtutil.PrettyNum(errors),
 			formatNumber(min), formatNumber(max),
 			formatNumber(men), formatNumber(med),
 			formatNumber(mgh), formatNumber(sdv),
 			formatNumber(p95), formatNumber(p99),
 		)
 	} else {
-		log.Info(
-			"Samples: %s | Min: %6s | Max: %6s | Mean: %6s | Median: %6s | Midhinge: %6s | StdDev: %6s | Perc95: %6s | Perc99: %6s",
-			fmtutil.PrettyNum(len(measurements)),
-			formatNumber(min), formatNumber(max),
-			formatNumber(men), formatNumber(med),
-			formatNumber(mgh), formatNumber(sdv),
-			formatNumber(p95), formatNumber(p99),
+		outputWriter.WriteString(
+			fmt.Sprintf(
+				"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+				timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
+				len(measurements), errors,
+				min, max, men, med, mgh, sdv, p95, p99,
+			),
 		)
 	}
 }
@@ -265,7 +303,7 @@ func formatNumber(value float64) string {
 // createOutputTable create and configure output table struct
 func createOutputTable() *table.Table {
 	t := table.NewTable(
-		"TIME", "SAMPLES", "MIN", "MAX", "MEAN",
+		"TIME", "SAMPLES", "ERRORS", "MIN", "MAX", "MEAN",
 		"MEDIAN", "STDDEV", "PERC 95", "PERC 99",
 	)
 
@@ -280,11 +318,22 @@ func createOutputTable() *table.Table {
 	return t
 }
 
+// createMeasurementsSlice create float64 slice for measurements
+func createMeasurementsSlice(sampleRate int) []float64 {
+	size := (options.GetI(OPT_INTERVAL) * 1000) / sampleRate
+	return make([]float64, size)
+}
+
+// flushOutput is function for flushing output
+func flushOutput(interval time.Duration) {
+	for range time.NewTicker(interval).C {
+		outputWriter.Flush()
+	}
+}
+
 // printErrorAndExit print error message and exit from utility
 func printErrorAndExit(f string, a ...interface{}) {
 	if options.Has(OPT_OUTPUT) {
-		log.Crit(f, a...)
-	} else {
 		printError(f, a...)
 	}
 
@@ -302,8 +351,8 @@ func shutdown(code int) {
 		conn.Close()
 	}
 
-	if options.Has(OPT_OUTPUT) {
-		log.Flush()
+	if outputWriter != nil {
+		outputWriter.Flush()
 	}
 
 	os.Exit(1)
@@ -315,14 +364,15 @@ func shutdown(code int) {
 func showUsage() {
 	info := usage.NewInfo("")
 
-	info.AddSpoiler("Utility show PING command latency in milliseconds (one thousandth of a second)")
+	info.AddSpoiler("Utility show PING command latency or connection latency in milliseconds (one thousandth of a second).")
 
 	info.AddOption(OPT_HOST, "Server hostname {s-}(127.0.0.1 by default){!}", "ip/host")
 	info.AddOption(OPT_PORT, "Server port {s-}(6379 by default){!}", "port")
+	info.AddOption(OPT_CONNECT, "Measure connection latency instead of command latency")
 	info.AddOption(OPT_AUTH, "Password to use when connecting to the server", "password")
 	info.AddOption(OPT_TIMEOUT, "Connection timeout in seconds {s-}(3 by default){!}", "1-300")
 	info.AddOption(OPT_INTERVAL, "Interval in seconds {s-}(60 by default){!}", "1-3600")
-	info.AddOption(OPT_OUTPUT, "Path to output file")
+	info.AddOption(OPT_OUTPUT, "Path to output CSV file")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
@@ -330,6 +380,11 @@ func showUsage() {
 	info.AddExample(
 		"-H 192.168.0.123 -P 6821 -t 15",
 		"Start monitoring instance on 192.168.0.123:6821 with 15 second timeout",
+	)
+
+	info.AddExample(
+		"-c -i 15 -o latency.csv",
+		"Start connection latency monitoring with 15 second interval and save result to CSV file",
 	)
 
 	info.Render()

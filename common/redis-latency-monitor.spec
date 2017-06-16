@@ -10,7 +10,7 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         1.1.0
+Version:         2.0.0
 Release:         0%{?dist}
 Group:           Applications/System
 License:         EKOL
@@ -27,7 +27,8 @@ Provides:        %{name} = %{version}-%{release}
 ###############################################################################
 
 %description
-Tiny Redis client for latency measurement.
+Tiny Redis client for latency measurement. Utility show PING command latency 
+or connection latency in milliseconds (one thousandth of a second).
 
 ###############################################################################
 
@@ -57,6 +58,10 @@ rm -rf %{buildroot}
 ###############################################################################
 
 %changelog
+* Fri Jun 16 2017 Anton Novojilov <andy@essentialkaos.com> - 2.0.0-0
+- Connection latency measurement
+- Output measurements in CSV format
+
 * Wed Jun 14 2017 Anton Novojilov <andy@essentialkaos.com> - 1.1.0-0
 - Measurements slice reusage
 - Improved UI and log output
