@@ -10,7 +10,7 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         2.0.0
+Version:         2.1.0
 Release:         0%{?dist}
 Group:           Applications/System
 License:         EKOL
@@ -58,6 +58,9 @@ rm -rf %{buildroot}
 ###############################################################################
 
 %changelog
+* Fri Jun 16 2017 Anton Novojilov <andy@essentialkaos.com> - 2.1.0-0
+- Improved UI
+
 * Fri Jun 16 2017 Anton Novojilov <andy@essentialkaos.com> - 2.0.0-0
 - Connection latency measurement
 - Output measurements in CSV format
