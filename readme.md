@@ -1,10 +1,10 @@
 ## Redis Latency Monitor [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.org/essentialkaos/redis-latency-monitor) [![Go Report Card](https://goreportcard.com/badge/github.com/essentialkaos/redis-latency-monitor)](https://goreportcard.com/report/github.com/essentialkaos/redis-latency-monitor) [![License](https://gh.kaos.io/ekol.svg)](https://essentialkaos.com/ekol)
 
-Tiny Redis client for latency measurement.
+Tiny Redis client for latency measurement. Utility show `PING` command latency or connection latency in milliseconds (_one thousandth of a second_).
 
 ### Usage demo
 
-[![demo](https://gh.kaos.io/redis-latency-monitor-102.gif)](#usage-demo)
+[![demo](https://gh.kaos.io/redis-latency-monitor-210.gif)](#usage-demo)
 
 ### Installation
 
