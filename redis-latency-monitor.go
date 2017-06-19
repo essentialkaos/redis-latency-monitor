@@ -15,6 +15,7 @@ import (
 	"net"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"pkg.re/essentialkaos/ek.v9/fmtc"
@@ -31,7 +32,7 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "2.0.0"
+	VER  = "2.1.0"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -294,10 +295,14 @@ func formatNumber(value float64) string {
 	}
 
 	if value == 0.0 {
-		return "0.001"
+		return "0{s-}.001{!}"
 	}
 
-	return fmtutil.PrettyNum(value)
+	if value > 1000.0 {
+		value = math.Floor(value)
+	}
+
+	return strings.Replace(fmtutil.PrettyNum(value), ".", "{s-}.", -1) + "{!}"
 }
 
 // createOutputTable create and configure output table struct
@@ -307,7 +312,7 @@ func createOutputTable() *table.Table {
 		"MEDIAN", "STDDEV", "PERC 95", "PERC 99",
 	)
 
-	t.SetSizes(12, 8, 8, 8, 8, 8, 8, 8)
+	t.SetSizes(12, 8, 8, 8, 10, 8, 8, 8)
 
 	t.SetAlignments(
 		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
