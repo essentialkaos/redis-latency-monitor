@@ -32,7 +32,7 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "2.1.0"
+	VER  = "2.2.0"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -184,8 +184,9 @@ func measureLatency(interval time.Duration, prettyOutput bool) {
 		buf = bufio.NewReader(conn)
 	}
 
-	last := time.Now()
 	measurements = createMeasurementsSlice(sampleRate)
+
+	last := alignTime()
 
 	for {
 		time.Sleep(time.Duration(sampleRate) * time.Millisecond)
@@ -321,6 +322,27 @@ func createOutputTable() *table.Table {
 	)
 
 	return t
+}
+
+// alignTime block main thread until nearest interval start point
+func alignTime() time.Time {
+	interval := options.GetI(OPT_INTERVAL)
+
+	for {
+		now := time.Now()
+
+		if interval >= 60 {
+			if now.Second() == 0 {
+				return now
+			}
+		} else {
+			if now.Second()%interval == 0 {
+				return now
+			}
+		}
+
+		time.Sleep(10 * time.Millisecond)
+	}
 }
 
 // createMeasurementsSlice create float64 slice for measurements
