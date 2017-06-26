@@ -21,6 +21,7 @@ import (
 	"pkg.re/essentialkaos/ek.v9/fmtc"
 	"pkg.re/essentialkaos/ek.v9/fmtutil"
 	"pkg.re/essentialkaos/ek.v9/fmtutil/table"
+	"pkg.re/essentialkaos/ek.v9/log"
 	"pkg.re/essentialkaos/ek.v9/options"
 	"pkg.re/essentialkaos/ek.v9/timeutil"
 	"pkg.re/essentialkaos/ek.v9/usage"
@@ -32,7 +33,7 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "2.2.0"
+	VER  = "2.3.0"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -42,32 +43,34 @@ const (
 )
 
 const (
-	OPT_HOST     = "H:host"
-	OPT_PORT     = "P:port"
-	OPT_AUTH     = "a:password"
-	OPT_TIMEOUT  = "t:timeout"
-	OPT_INTERVAL = "i:interval"
-	OPT_CONNECT  = "c:connect"
-	OPT_OUTPUT   = "o:output"
-	OPT_NO_COLOR = "nc:no-color"
-	OPT_HELP     = "h:help"
-	OPT_VER      = "v:version"
+	OPT_HOST      = "h:host"
+	OPT_PORT      = "p:port"
+	OPT_AUTH      = "a:password"
+	OPT_TIMEOUT   = "t:timeout"
+	OPT_INTERVAL  = "i:interval"
+	OPT_CONNECT   = "c:connect"
+	OPT_OUTPUT    = "o:output"
+	OPT_ERROR_LOG = "e:error-log"
+	OPT_NO_COLOR  = "nc:no-color"
+	OPT_HELP      = "help"
+	OPT_VER       = "v:version"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // optMap is map with options
 var optMap = options.Map{
-	OPT_HOST:     {Value: "127.0.0.1"},
-	OPT_PORT:     {Value: "6379"},
-	OPT_CONNECT:  {Type: options.BOOL},
-	OPT_TIMEOUT:  {Type: options.INT, Value: 3, Min: 1, Max: 300},
-	OPT_AUTH:     {},
-	OPT_INTERVAL: {Type: options.INT, Value: 60, Min: 1, Max: 3600},
-	OPT_OUTPUT:   {},
-	OPT_NO_COLOR: {Type: options.BOOL},
-	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
+	OPT_HOST:      {Value: "127.0.0.1"},
+	OPT_PORT:      {Value: "6379"},
+	OPT_CONNECT:   {Type: options.BOOL},
+	OPT_TIMEOUT:   {Type: options.INT, Value: 3, Min: 1, Max: 300},
+	OPT_AUTH:      {},
+	OPT_INTERVAL:  {Type: options.INT, Value: 60, Min: 1, Max: 3600},
+	OPT_OUTPUT:    {},
+	OPT_ERROR_LOG: {},
+	OPT_NO_COLOR:  {Type: options.BOOL},
+	OPT_HELP:      {Type: options.BOOL, Alias: "u:usage"},
+	OPT_VER:       {Type: options.BOOL, Alias: "ver"},
 }
 
 // pingCommand is PING command data
@@ -78,6 +81,7 @@ var (
 	host         string
 	timeout      time.Duration
 	outputWriter *bufio.Writer
+	errorLogged  bool
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -110,7 +114,20 @@ func main() {
 		return
 	}
 
+	if options.Has(OPT_ERROR_LOG) {
+		setupErrorLog()
+	}
+
 	startMeasurementProcess()
+}
+
+// setupErrorLog setup error log
+func setupErrorLog() {
+	err := log.Set(options.GetS(OPT_ERROR_LOG), 0644)
+
+	if err != nil {
+		printErrorAndExit(err.Error())
+	}
 }
 
 // startMeasurementProcess start measurement process
@@ -122,7 +139,7 @@ func startMeasurementProcess() {
 	timeout = time.Second * time.Duration(options.GetI(OPT_TIMEOUT))
 
 	if !options.GetB(OPT_CONNECT) {
-		connectToRedis()
+		connectToRedis(false)
 	}
 
 	if options.Has(OPT_OUTPUT) {
@@ -146,18 +163,24 @@ func createOutputWriter() {
 }
 
 // connectToRedis connect to redis instance
-func connectToRedis() {
+func connectToRedis(reconnect bool) error {
 	var err error
 
 	conn, err = net.DialTimeout("tcp", host, timeout)
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		if !reconnect {
+			printErrorAndExit("Can't connect to Redis on %s", host)
+		} else {
+			return err
+		}
 	}
 
 	if options.GetS(OPT_AUTH) != "" {
 		conn.Write([]byte("AUTH " + options.GetS(OPT_AUTH) + "\n"))
 	}
+
+	return nil
 }
 
 // measureLatency measure latency
@@ -226,17 +249,39 @@ func measureLatency(interval time.Duration, prettyOutput bool) {
 
 // execCommand execute command and read output
 func execCommand(buf *bufio.Reader) int {
+	if conn == nil {
+		if connectToRedis(true) != nil {
+			return 1
+		}
+	}
+
 	_, err := conn.Write(pingCommand)
 
 	if err != nil {
+		if options.Has(OPT_ERROR_LOG) && !errorLogged {
+			log.Error(err.Error())
+			errorLogged = true
+		}
+
+		conn = nil
+
 		return 1
 	}
 
 	_, err = buf.ReadString('\n')
 
 	if err != nil && err != io.EOF {
+		if options.Has(OPT_ERROR_LOG) && !errorLogged {
+			log.Error(err.Error())
+			errorLogged = true
+		}
+
+		conn = nil
+
 		return 1
 	}
+
+	errorLogged = false
 
 	return 0
 }
@@ -248,10 +293,17 @@ func makeConnection() int {
 	conn, err = net.DialTimeout("tcp", host, timeout)
 
 	if err != nil {
+		if options.Has(OPT_ERROR_LOG) && !errorLogged {
+			log.Error(err.Error())
+			errorLogged = true
+		}
+
 		return 1
 	}
 
 	conn.Close()
+
+	errorLogged = false
 
 	return 0
 }
@@ -360,10 +412,7 @@ func flushOutput(interval time.Duration) {
 
 // printErrorAndExit print error message and exit from utility
 func printErrorAndExit(f string, a ...interface{}) {
-	if options.Has(OPT_OUTPUT) {
-		printError(f, a...)
-	}
-
+	printError(f, a...)
 	shutdown(1)
 }
 
@@ -399,13 +448,14 @@ func showUsage() {
 	info.AddOption(OPT_AUTH, "Password to use when connecting to the server", "password")
 	info.AddOption(OPT_TIMEOUT, "Connection timeout in seconds {s-}(3 by default){!}", "1-300")
 	info.AddOption(OPT_INTERVAL, "Interval in seconds {s-}(60 by default){!}", "1-3600")
-	info.AddOption(OPT_OUTPUT, "Path to output CSV file")
+	info.AddOption(OPT_OUTPUT, "Path to output CSV file", "file")
+	info.AddOption(OPT_ERROR_LOG, "Path to log with error messages", "file")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
 
 	info.AddExample(
-		"-H 192.168.0.123 -P 6821 -t 15",
+		"-h 192.168.0.123 -p 6821 -t 15",
 		"Start monitoring instance on 192.168.0.123:6821 with 15 second timeout",
 	)
 

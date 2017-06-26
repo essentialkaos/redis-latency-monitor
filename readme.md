@@ -51,22 +51,29 @@ You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](
 ```
 Usage: redis-latency-monitor {options}
 
+Utility show PING command latency or connection latency in milliseconds (one thousandth of a second).
+
 Options
 
-  --host, -H ip/host         Server hostname (127.0.0.1 by default)
-  --port, -P port            Server port (6379 by default)
+  --host, -h ip/host         Server hostname (127.0.0.1 by default)
+  --port, -p port            Server port (6379 by default)
+  --connect, -c              Measure connection latency instead of command latency
   --password, -a password    Password to use when connecting to the server
   --timeout, -t 1-300        Connection timeout in seconds (3 by default)
   --interval, -i 1-3600      Interval in seconds (60 by default)
-  --output, -o               Path to output file
+  --output, -o file          Path to output CSV file
+  --error-log, -e file       Path to log with error messages
   --no-color, -nc            Disable colors in output
-  --help, -h                 Show this help message
+  --help                     Show this help message
   --version, -v              Show version
 
 Examples
 
-  redis-latency-monitor -H 192.168.0.123 -P 6821 -t 15
+  redis-latency-monitor -h 192.168.0.123 -p 6821 -t 15
   Start monitoring instance on 192.168.0.123:6821 with 15 second timeout
+
+  redis-latency-monitor -c -i 15 -o latency.csv
+  Start connection latency monitoring with 15 second interval and save result to CSV file
 
 ```
 
