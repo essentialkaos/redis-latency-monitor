@@ -10,7 +10,7 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         2.2.0
+Version:         2.3.0
 Release:         0%{?dist}
 Group:           Applications/System
 License:         EKOL
@@ -58,6 +58,10 @@ rm -rf %{buildroot}
 ###############################################################################
 
 %changelog
+* Mon Jun 26 2017 Anton Novojilov <andy@essentialkaos.com> - 2.3.0-0
+- Added option --error-log/-e for logging error messages
+- Improved working with Redis connection
+
 * Fri Jun 23 2017 Anton Novojilov <andy@essentialkaos.com> - 2.2.0-0
 - Alignment of interval start point
 
