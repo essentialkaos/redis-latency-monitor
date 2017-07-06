@@ -33,7 +33,7 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "2.3.0"
+	VER  = "2.3.1"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -177,7 +177,15 @@ func connectToRedis(reconnect bool) error {
 	}
 
 	if options.GetS(OPT_AUTH) != "" {
-		conn.Write([]byte("AUTH " + options.GetS(OPT_AUTH) + "\n"))
+		_, err = conn.Write([]byte("AUTH " + options.GetS(OPT_AUTH) + "\r\n"))
+
+		if err != nil {
+			if !reconnect {
+				printErrorAndExit("Can't send AUTH command")
+			} else {
+				return err
+			}
+		}
 	}
 
 	return nil
@@ -431,7 +439,7 @@ func shutdown(code int) {
 		outputWriter.Flush()
 	}
 
-	os.Exit(1)
+	os.Exit(code)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

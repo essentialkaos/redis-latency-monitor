@@ -79,10 +79,10 @@ Examples
 
 ### Build Status
 
-| Repository | Status |
-|------------|--------|
-| Stable | [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.org/essentialkaos/redis-latency-monitor) |
-| Unstable | [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=develop)](https://travis-ci.org/essentialkaos/redis-latency-monitor) |
+| Branch | Status |
+|--------|--------|
+| `master` | [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.org/essentialkaos/redis-latency-monitor) |
+| `develop` | [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=develop)](https://travis-ci.org/essentialkaos/redis-latency-monitor) |
 
 ### License
 
