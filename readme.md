@@ -16,7 +16,7 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.6+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.7+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
 go get github.com/essentialkaos/redis-latency-monitor
@@ -61,6 +61,7 @@ Options
   --password, -a password    Password to use when connecting to the server
   --timeout, -t 1-300        Connection timeout in seconds (3 by default)
   --interval, -i 1-3600      Interval in seconds (60 by default)
+  --timestamps, -T           Use unix timestamps in output
   --output, -o file          Path to output CSV file
   --error-log, -e file       Path to log with error messages
   --no-color, -nc            Disable colors in output
