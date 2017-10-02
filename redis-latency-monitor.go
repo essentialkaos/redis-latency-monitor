@@ -1,3 +1,5 @@
+// +build linux
+
 package main
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -33,7 +35,7 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "2.3.1"
+	VER  = "2.4.0"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -43,34 +45,36 @@ const (
 )
 
 const (
-	OPT_HOST      = "h:host"
-	OPT_PORT      = "p:port"
-	OPT_AUTH      = "a:password"
-	OPT_TIMEOUT   = "t:timeout"
-	OPT_INTERVAL  = "i:interval"
-	OPT_CONNECT   = "c:connect"
-	OPT_OUTPUT    = "o:output"
-	OPT_ERROR_LOG = "e:error-log"
-	OPT_NO_COLOR  = "nc:no-color"
-	OPT_HELP      = "help"
-	OPT_VER       = "v:version"
+	OPT_HOST       = "h:host"
+	OPT_PORT       = "p:port"
+	OPT_AUTH       = "a:password"
+	OPT_TIMEOUT    = "t:timeout"
+	OPT_INTERVAL   = "i:interval"
+	OPT_CONNECT    = "c:connect"
+	OPT_TIMESTAMPS = "T:timestamps"
+	OPT_OUTPUT     = "o:output"
+	OPT_ERROR_LOG  = "e:error-log"
+	OPT_NO_COLOR   = "nc:no-color"
+	OPT_HELP       = "help"
+	OPT_VER        = "v:version"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // optMap is map with options
 var optMap = options.Map{
-	OPT_HOST:      {Value: "127.0.0.1"},
-	OPT_PORT:      {Value: "6379"},
-	OPT_CONNECT:   {Type: options.BOOL},
-	OPT_TIMEOUT:   {Type: options.INT, Value: 3, Min: 1, Max: 300},
-	OPT_AUTH:      {},
-	OPT_INTERVAL:  {Type: options.INT, Value: 60, Min: 1, Max: 3600},
-	OPT_OUTPUT:    {},
-	OPT_ERROR_LOG: {},
-	OPT_NO_COLOR:  {Type: options.BOOL},
-	OPT_HELP:      {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:       {Type: options.BOOL, Alias: "ver"},
+	OPT_HOST:       {Value: "127.0.0.1"},
+	OPT_PORT:       {Value: "6379"},
+	OPT_CONNECT:    {Type: options.BOOL},
+	OPT_TIMEOUT:    {Type: options.INT, Value: 3, Min: 1, Max: 300},
+	OPT_AUTH:       {},
+	OPT_INTERVAL:   {Type: options.INT, Value: 60, Min: 1, Max: 3600},
+	OPT_TIMESTAMPS: {Type: options.BOOL},
+	OPT_OUTPUT:     {},
+	OPT_ERROR_LOG:  {},
+	OPT_NO_COLOR:   {Type: options.BOOL},
+	OPT_HELP:       {Type: options.BOOL, Alias: "u:usage"},
+	OPT_VER:        {Type: options.BOOL, Alias: "ver"},
 }
 
 // pingCommand is PING command data
@@ -338,14 +342,25 @@ func printMeasurements(t *table.Table, errors int, measurements []float64, prett
 			formatNumber(p95), formatNumber(p99),
 		)
 	} else {
-		outputWriter.WriteString(
-			fmt.Sprintf(
-				"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
-				timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
-				len(measurements), errors,
-				min, max, men, med, mgh, sdv, p95, p99,
-			),
-		)
+		if options.GetB(OPT_TIMESTAMPS) {
+			outputWriter.WriteString(
+				fmt.Sprintf(
+					"%d;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+					time.Now().Unix(), len(measurements), errors,
+					min, max, men, med, mgh, sdv, p95, p99,
+				),
+			)
+		} else {
+			outputWriter.WriteString(
+				fmt.Sprintf(
+					"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+					timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
+					len(measurements), errors,
+					min, max, men, med, mgh, sdv, p95, p99,
+				),
+			)
+		}
+
 	}
 }
 
@@ -456,6 +471,7 @@ func showUsage() {
 	info.AddOption(OPT_AUTH, "Password to use when connecting to the server", "password")
 	info.AddOption(OPT_TIMEOUT, "Connection timeout in seconds {s-}(3 by default){!}", "1-300")
 	info.AddOption(OPT_INTERVAL, "Interval in seconds {s-}(60 by default){!}", "1-3600")
+	info.AddOption(OPT_TIMESTAMPS, "Use unix timestamps in output")
 	info.AddOption(OPT_OUTPUT, "Path to output CSV file", "file")
 	info.AddOption(OPT_ERROR_LOG, "Path to log with error messages", "file")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
