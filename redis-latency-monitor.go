@@ -33,7 +33,7 @@ import (
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "2.4.0"
+	VER  = "2.4.1"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
