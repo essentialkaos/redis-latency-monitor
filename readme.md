@@ -4,7 +4,7 @@ Tiny Redis client for latency measurement. Utility show `PING` command latency o
 
 ### Usage demo
 
-[![demo](https://gh.kaos.io/redis-latency-monitor-210.gif)](#usage-demo)
+[![demo](https://gh.kaos.io/redis-latency-monitor-301.gif)](#usage-demo)
 
 ### Installation
 

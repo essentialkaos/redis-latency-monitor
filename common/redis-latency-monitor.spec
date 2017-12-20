@@ -10,7 +10,7 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.0.0
+Version:         3.0.1
 Release:         0%{?dist}
 Group:           Applications/System
 License:         EKOL
@@ -58,6 +58,9 @@ rm -rf %{buildroot}
 ###############################################################################
 
 %changelog
+* Thu Dec 21 2017 Anton Novojilov <andy@essentialkaos.com> - 3.0.1-0
+- Minor UI fixes
+
 * Tue Dec 19 2017 Anton Novojilov <andy@essentialkaos.com> - 3.0.0-0
 - Fixed bug with percentile calculation
 - ek package updated to latest version
