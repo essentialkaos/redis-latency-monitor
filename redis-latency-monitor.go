@@ -11,7 +11,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"math"
 	"net"
 	"os"
 	"runtime"
@@ -22,18 +21,19 @@ import (
 	"pkg.re/essentialkaos/ek.v9/fmtutil"
 	"pkg.re/essentialkaos/ek.v9/fmtutil/table"
 	"pkg.re/essentialkaos/ek.v9/log"
+	"pkg.re/essentialkaos/ek.v9/mathutil"
 	"pkg.re/essentialkaos/ek.v9/options"
 	"pkg.re/essentialkaos/ek.v9/timeutil"
 	"pkg.re/essentialkaos/ek.v9/usage"
 
-	"github.com/montanaflynn/stats"
+	"github.com/essentialkaos/redis-latency-monitor/stats"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "2.4.1"
+	VER  = "3.0.0"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -196,7 +196,7 @@ func connectToRedis(reconnect bool) error {
 // measureLatency measure latency
 func measureLatency(interval time.Duration, prettyOutput bool) {
 	var (
-		measurements   []float64
+		measurements   stats.Data
 		count, pointer int
 		t              *table.Table
 		sampleRate     int
@@ -232,7 +232,7 @@ func measureLatency(interval time.Duration, prettyOutput bool) {
 			errors += execCommand(buf)
 		}
 
-		dur := float64(time.Since(start)) / float64(time.Millisecond)
+		dur := uint64(time.Since(start) / time.Microsecond)
 		measurements[pointer] = dur
 
 		if time.Since(last) >= interval {
@@ -319,15 +319,15 @@ func makeConnection() int {
 }
 
 // printMeasurements calculate and print measurements
-func printMeasurements(t *table.Table, errors int, measurements []float64, prettyOutput bool) {
-	min, _ := stats.Min(measurements)
-	max, _ := stats.Max(measurements)
-	men, _ := stats.Mean(measurements)
-	med, _ := stats.Median(measurements)
-	mgh, _ := stats.Midhinge(measurements)
-	sdv, _ := stats.StandardDeviation(measurements)
-	p95, _ := stats.Percentile(measurements, 95.0)
-	p99, _ := stats.Percentile(measurements, 99.0)
+func printMeasurements(t *table.Table, errors int, measurements stats.Data, prettyOutput bool) {
+	measurements.Sort()
+
+	min := stats.Min(measurements)
+	max := stats.Max(measurements)
+	men := stats.Mean(measurements)
+	sdv := stats.StandardDeviation(measurements)
+	p95 := stats.Percentile(measurements, 95.0)
+	p99 := stats.Percentile(measurements, 99.0)
 
 	if prettyOutput {
 		t.Print(
@@ -335,26 +335,25 @@ func printMeasurements(t *table.Table, errors int, measurements []float64, prett
 			fmtutil.PrettyNum(len(measurements)),
 			fmtutil.PrettyNum(errors),
 			formatNumber(min), formatNumber(max),
-			formatNumber(men), formatNumber(med),
-			formatNumber(mgh), formatNumber(sdv),
+			formatNumber(men), formatNumber(sdv),
 			formatNumber(p95), formatNumber(p99),
 		)
 	} else {
 		if options.GetB(OPT_TIMESTAMPS) {
 			outputWriter.WriteString(
 				fmt.Sprintf(
-					"%d;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+					"%d;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
 					time.Now().Unix(), len(measurements), errors,
-					min, max, men, med, mgh, sdv, p95, p99,
+					min, max, men, sdv, p95, p99,
 				),
 			)
 		} else {
 			outputWriter.WriteString(
 				fmt.Sprintf(
-					"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+					"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
 					timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
 					len(measurements), errors,
-					min, max, men, med, mgh, sdv, p95, p99,
+					min, max, men, sdv, p95, p99,
 				),
 			)
 		}
@@ -363,27 +362,30 @@ func printMeasurements(t *table.Table, errors int, measurements []float64, prett
 }
 
 // formatNumber format floating number
-func formatNumber(value float64) string {
-	if math.IsNaN(value) {
-		return "------"
+func formatNumber(value uint64) string {
+	if value == 0 {
+		return "{s-}------{!}"
 	}
 
-	if value == 0.0 {
-		return "0{s-}.001{!}"
+	fv := float64(value) / 1000.0
+
+	switch {
+	case fv > 1000.0:
+		fv = mathutil.Round(fv, 0)
+	case fv > 10:
+		fv = mathutil.Round(fv, 1)
+	case fv > 1:
+		fv = mathutil.Round(fv, 2)
 	}
 
-	if value > 1000.0 {
-		value = math.Floor(value)
-	}
-
-	return strings.Replace(fmtutil.PrettyNum(value), ".", "{s-}.", -1) + "{!}"
+	return strings.Replace(fmtutil.PrettyNum(fv), ".", "{s-}.", -1) + "{!}"
 }
 
 // createOutputTable create and configure output table struct
 func createOutputTable() *table.Table {
 	t := table.NewTable(
-		"TIME", "SAMPLES", "ERRORS", "MIN", "MAX", "MEAN",
-		"MEDIAN", "STDDEV", "PERC 95", "PERC 99",
+		"TIME", "SAMPLES", "ERRORS", "MIN", "MAX",
+		"MEAN", "STDDEV", "PERC 95", "PERC 99",
 	)
 
 	t.SetSizes(12, 8, 8, 8, 10, 8, 8, 8)
@@ -391,7 +393,7 @@ func createOutputTable() *table.Table {
 	t.SetAlignments(
 		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
 		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
-		table.ALIGN_RIGHT, table.ALIGN_RIGHT,
+		table.ALIGN_RIGHT,
 	)
 
 	return t
@@ -419,9 +421,9 @@ func alignTime() time.Time {
 }
 
 // createMeasurementsSlice create float64 slice for measurements
-func createMeasurementsSlice(sampleRate int) []float64 {
+func createMeasurementsSlice(sampleRate int) []uint64 {
 	size := (options.GetI(OPT_INTERVAL) * 1000) / sampleRate
-	return make([]float64, size)
+	return make(stats.Data, size)
 }
 
 // flushOutput is function for flushing output

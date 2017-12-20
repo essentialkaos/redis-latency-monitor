@@ -16,7 +16,6 @@ redis-latency-monitor:
 
 deps:
 	git config --global http.https://pkg.re.followRedirects true
-	go get -d -v github.com/montanaflynn/stats
 	go get -d -v pkg.re/essentialkaos/ek.v9
 
 fmt:
