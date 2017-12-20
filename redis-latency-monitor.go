@@ -34,7 +34,7 @@ import (
 // App info
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "3.0.0"
+	VER  = "3.0.1"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -403,7 +403,7 @@ func createOutputTable() *table.Table {
 	t.SetAlignments(
 		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
 		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
-		table.ALIGN_RIGHT,
+		table.ALIGN_RIGHT, table.ALIGN_RIGHT,
 	)
 
 	return t
