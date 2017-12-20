@@ -59,9 +59,10 @@ rm -rf %{buildroot}
 
 %changelog
 * Tue Dec 19 2017 Anton Novojilov <andy@essentialkaos.com> - 3.0.0-0
+- Fixed bug with percentile calculation
 - ek package updated to latest version
-- stats package updated to latest version
-- Improved stats calculation
+- More precise latency calculation
+- Removed external packages
 - Improved UI
 - Code refactoring
 
