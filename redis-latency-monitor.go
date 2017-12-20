@@ -31,17 +31,20 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// App info
 const (
 	APP  = "Redis Latency Monitor"
 	VER  = "3.0.0"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
+// Main constatnts
 const (
 	LATENCY_SAMPLE_RATE int = 10
 	CONNECT_SAMPLE_RATE     = 100
 )
 
+// Options
 const (
 	OPT_HOST       = "h:host"
 	OPT_PORT       = "p:port"
@@ -342,7 +345,7 @@ func printMeasurements(t *table.Table, errors int, measurements stats.Data, pret
 		if options.GetB(OPT_TIMESTAMPS) {
 			outputWriter.WriteString(
 				fmt.Sprintf(
-					"%d;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+					"%d;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
 					time.Now().Unix(), len(measurements), errors,
 					min, max, men, sdv, p95, p99,
 				),
@@ -350,7 +353,7 @@ func printMeasurements(t *table.Table, errors int, measurements stats.Data, pret
 		} else {
 			outputWriter.WriteString(
 				fmt.Sprintf(
-					"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+					"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
 					timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
 					len(measurements), errors,
 					min, max, men, sdv, p95, p99,
