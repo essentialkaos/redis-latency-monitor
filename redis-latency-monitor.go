@@ -347,7 +347,8 @@ func printMeasurements(t *table.Table, errors int, measurements stats.Data, pret
 				fmt.Sprintf(
 					"%d;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
 					time.Now().Unix(), len(measurements), errors,
-					min, max, men, sdv, p95, p99,
+					usToMs(min), usToMs(max), usToMs(men),
+					usToMs(sdv), usToMs(p95), usToMs(p99),
 				),
 			)
 		} else {
@@ -356,7 +357,8 @@ func printMeasurements(t *table.Table, errors int, measurements stats.Data, pret
 					"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
 					timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
 					len(measurements), errors,
-					min, max, men, sdv, p95, p99,
+					usToMs(min), usToMs(max), usToMs(men),
+					usToMs(sdv), usToMs(p95), usToMs(p99),
 				),
 			)
 		}
@@ -382,6 +384,11 @@ func formatNumber(value uint64) string {
 	}
 
 	return strings.Replace(fmtutil.PrettyNum(fv), ".", "{s-}.", -1) + "{!}"
+}
+
+// usToMs convert us in uint64 to ms in float64
+func usToMs(us uint64) float64 {
+	return float64(us) / 1000.0
 }
 
 // createOutputTable create and configure output table struct
