@@ -17,9 +17,9 @@ import (
 // Data contains stats data
 type Data []uint64
 
-func (s Data) Len() int           { return len(s) }
-func (s Data) Less(i, j int) bool { return s[i] < s[j] }
-func (s Data) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (d Data) Len() int           { return len(d) }
+func (d Data) Less(i, j int) bool { return d[i] < d[j] }
+func (d Data) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -83,7 +83,7 @@ func StandardDeviation(d Data) uint64 {
 	return uint64(math.Pow(vr, 0.5))
 }
 
-// Percentile calcualte percetile
+// Percentile calculate percetile
 func Percentile(d Data, percent float64) uint64 {
 	if percent > 100 {
 		return 0
