@@ -1,10 +1,19 @@
-## Redis Latency Monitor [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.org/essentialkaos/redis-latency-monitor) [![Go Report Card](https://goreportcard.com/badge/github.com/essentialkaos/redis-latency-monitor)](https://goreportcard.com/report/github.com/essentialkaos/redis-latency-monitor) [![codebeat badge](https://codebeat.co/badges/40d24053-129b-4407-97bd-adecc66c8903)](https://codebeat.co/projects/github-com-essentialkaos-redis-latency-monitor-master) [![License](https://gh.kaos.io/ekol.svg)](https://essentialkaos.com/ekol)
+<p align="center"><a href="#readme"><img src="https://gh.kaos.st/redis-latency-monitor.svg"/></a></p>
+
+<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
+
+<p align="center">
+  <a href="https://travis-ci.org/essentialkaos/redis-latency-monitor"><img src="https://travis-ci.org/essentialkaos/redis-latency-monitor.svg"></a>
+  <a href="https://goreportcard.com/report/github.com/essentialkaos/mdtoc"><img src="https://goreportcard.com/badge/github.com/essentialkaos/mdtoc"></a>
+  <a href="https://codebeat.co/projects/github-com-essentialkaos-redis-latency-monitor-master"><img alt="codebeat badge" src="https://codebeat.co/badges/40d24053-129b-4407-97bd-adecc66c8903" /></a>
+  <a href="https://essentialkaos.com/ekol"><img src="https://gh.kaos.st/ekol.svg"></a>
+</p>
 
 Tiny Redis client for latency measurement. Utility show `PING` command latency or connection latency in milliseconds (_one thousandth of a second_).
 
 ### Usage demo
 
-[![demo](https://gh.kaos.io/redis-latency-monitor-301.gif)](#usage-demo)
+[![demo](https://gh.kaos.st/redis-latency-monitor-301.gif)](#usage-demo)
 
 ### Installation
 
@@ -16,7 +25,7 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.7+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.7+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get github.com/essentialkaos/redis-latency-monitor
@@ -31,20 +40,20 @@ go get -u github.com/essentialkaos/redis-latency-monitor
 #### From ESSENTIAL KAOS Public repo for RHEL6/CentOS6
 
 ```bash
-[sudo] yum install -y https://yum.kaos.io/6/release/x86_64/kaos-repo-8.0-0.el6.noarch.rpm
+[sudo] yum install -y https://yum.kaos.st/6/release/x86_64/kaos-repo-9.1-0.el6.noarch.rpm
 [sudo] yum install redis-latency-monitor
 ```
 
 #### From ESSENTIAL KAOS Public repo for RHEL7/CentOS7
 
 ```bash
-[sudo] yum install -y https://yum.kaos.io/7/release/x86_64/kaos-repo-8.0-0.el7.noarch.rpm
+[sudo] yum install -y https://yum.kaos.st/7/release/x86_64/kaos-repo-9.1-0.el7.noarch.rpm
 [sudo] yum install redis-latency-monitor
 ```
 
 #### Prebuilt binaries
 
-You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.io/redis-latency-monitor/latest).
+You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.st/redis-latency-monitor/latest).
 
 ### Usage
 
@@ -89,4 +98,4 @@ Examples
 
 [EKOL](https://essentialkaos.com/ekol)
 
-<p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.io/ekgh.svg"/></a></p>
+<p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.st/ekgh.svg"/></a></p>
