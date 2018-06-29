@@ -1,12 +1,12 @@
-###############################################################################
+################################################################################
 
 # rpmbuilder:relative-pack true
 
-###############################################################################
+################################################################################
 
 %define  debug_package %{nil}
 
-###############################################################################
+################################################################################
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
@@ -24,19 +24,19 @@ BuildRequires:   golang >= 1.8
 
 Provides:        %{name} = %{version}-%{release}
 
-###############################################################################
+################################################################################
 
 %description
-Tiny Redis client for latency measurement. Utility show PING command latency 
+Tiny Redis client for latency measurement. Utility show PING command latency
 or connection latency in milliseconds (one thousandth of a second).
 
-###############################################################################
+################################################################################
 
 %prep
 %setup -q
 
 %build
-export GOPATH=$(pwd) 
+export GOPATH=$(pwd)
 go build src/github.com/essentialkaos/%{name}/%{name}.go
 
 %install
@@ -48,14 +48,14 @@ install -pm 755 %{name} %{buildroot}%{_bindir}/
 %clean
 rm -rf %{buildroot}
 
-###############################################################################
+################################################################################
 
 %files
 %defattr(-,root,root,-)
 %doc LICENSE.EN LICENSE.RU
 %{_bindir}/%{name}
 
-###############################################################################
+################################################################################
 
 %changelog
 * Thu Dec 21 2017 Anton Novojilov <andy@essentialkaos.com> - 3.0.1-0
