@@ -34,7 +34,7 @@ import (
 // App info
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "3.0.1"
+	VER  = "3.0.2"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -64,7 +64,7 @@ const (
 
 // optMap is map with options
 var optMap = options.Map{
-	OPT_HOST:       {Value: "127.0.0.1"},
+	OPT_HOST:       {Type: options.MIXED, Value: "127.0.0.1"},
 	OPT_PORT:       {Value: "6379"},
 	OPT_CONNECT:    {Type: options.BOOL},
 	OPT_TIMEOUT:    {Type: options.INT, Value: 3, Min: 1, Max: 300},
@@ -114,7 +114,7 @@ func main() {
 		return
 	}
 
-	if options.GetB(OPT_HELP) {
+	if options.GetB(OPT_HELP) || options.GetS(OPT_HOST) == "true" {
 		showUsage()
 		return
 	}
