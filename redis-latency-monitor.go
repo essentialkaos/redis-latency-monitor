@@ -34,7 +34,7 @@ import (
 // App info
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "3.0.2"
+	VER  = "3.0.3"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -334,7 +334,7 @@ func printMeasurements(t *table.Table, errors int, measurements stats.Data, pret
 
 	if prettyOutput {
 		t.Print(
-			timeutil.Format(time.Now(), "%H:%M:%S.%K"),
+			timeutil.Format(time.Now(), "%H:%M:%S{s-}.%K{!}"),
 			fmtutil.PrettyNum(len(measurements)),
 			fmtutil.PrettyNum(errors),
 			formatNumber(min), formatNumber(max),
@@ -383,7 +383,7 @@ func formatNumber(value uint64) string {
 		fv = mathutil.Round(fv, 2)
 	}
 
-	return strings.Replace(fmtutil.PrettyNum(fv), ".", "{s-}.", -1) + "{!}"
+	return strings.Replace(fmtutil.PrettyNum(fv), ".", "{s}.", -1) + "{!}"
 }
 
 // usToMs convert us in uint64 to ms in float64
