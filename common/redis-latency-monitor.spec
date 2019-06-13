@@ -10,17 +10,17 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.0.3
+Version:         3.1.0
 Release:         0%{?dist}
 Group:           Applications/System
 License:         EKOL
 URL:             https://github.com/essentialkaos/redis-latency-monitor
 
-Source0:         https://source.kaos.io/%{name}/%{name}-%{version}.tar.bz2
+Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.8
+BuildRequires:   golang >= 1.12
 
 Provides:        %{name} = %{version}-%{release}
 
@@ -58,6 +58,9 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Thu Jun 13 2019 Anton Novojilov <andy@essentialkaos.com> - 3.1.0-0
+- ek package updated to the latest stable version
+
 * Wed Oct 31 2018 Anton Novojilov <andy@essentialkaos.com> - 3.0.3-0
 - Fixed bug with Max/Mean/StDev/Perc calculation
 - Minor UI improvements
