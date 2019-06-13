@@ -25,6 +25,9 @@ import (
 	"pkg.re/essentialkaos/ek.v10/options"
 	"pkg.re/essentialkaos/ek.v10/timeutil"
 	"pkg.re/essentialkaos/ek.v10/usage"
+	"pkg.re/essentialkaos/ek.v10/usage/completion/bash"
+	"pkg.re/essentialkaos/ek.v10/usage/completion/fish"
+	"pkg.re/essentialkaos/ek.v10/usage/completion/zsh"
 
 	"github.com/essentialkaos/redis-latency-monitor/stats"
 )
@@ -58,6 +61,8 @@ const (
 	OPT_NO_COLOR   = "nc:no-color"
 	OPT_HELP       = "help"
 	OPT_VER        = "v:version"
+
+	OPT_COMPLETION = "completion"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -76,6 +81,8 @@ var optMap = options.Map{
 	OPT_NO_COLOR:   {Type: options.BOOL},
 	OPT_HELP:       {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:        {Type: options.BOOL, Alias: "ver"},
+
+	OPT_COMPLETION: {},
 }
 
 // pingCommand is PING command data
@@ -103,6 +110,10 @@ func main() {
 		}
 
 		os.Exit(1)
+	}
+
+	if options.Has(OPT_COMPLETION) {
+		genCompletion()
 	}
 
 	if options.GetB(OPT_NO_COLOR) {
@@ -471,6 +482,11 @@ func shutdown(code int) {
 
 // showUsage print usage info
 func showUsage() {
+	genUsage().Render()
+}
+
+// genUsage generates usage info
+func genUsage() *usage.Info {
 	info := usage.NewInfo("")
 
 	info.AddSpoiler("Utility show PING command latency or connection latency in milliseconds (one thousandth of a second).")
@@ -498,7 +514,25 @@ func showUsage() {
 		"Start connection latency monitoring with 15 second interval and save result to CSV file",
 	)
 
-	info.Render()
+	return info
+}
+
+// genCompletion generates completion for different shells
+func genCompletion() {
+	info := genUsage()
+
+	switch options.GetS(OPT_COMPLETION) {
+	case "bash":
+		fmt.Printf(bash.Generate(info, "redis-latency-monitor"))
+	case "fish":
+		fmt.Printf(fish.Generate(info, "redis-latency-monitor"))
+	case "zsh":
+		fmt.Printf(zsh.Generate(info, optMap, "redis-latency-monitor"))
+	default:
+		os.Exit(1)
+	}
+
+	os.Exit(0)
 }
 
 // showAbout print info about version
