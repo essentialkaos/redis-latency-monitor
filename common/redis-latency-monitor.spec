@@ -10,17 +10,17 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.0.3
+Version:         3.1.0
 Release:         0%{?dist}
 Group:           Applications/System
 License:         EKOL
 URL:             https://github.com/essentialkaos/redis-latency-monitor
 
-Source0:         https://source.kaos.io/%{name}/%{name}-%{version}.tar.bz2
+Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.8
+BuildRequires:   golang >= 1.12
 
 Provides:        %{name} = %{version}-%{release}
 
@@ -48,6 +48,34 @@ install -pm 755 %{name} %{buildroot}%{_bindir}/
 %clean
 rm -rf %{buildroot}
 
+%post
+if [[ -d %{_sysconfdir}/bash_completion.d ]] ; then
+  %{name} --completion=bash 1> %{_sysconfdir}/bash_completion.d/%{name} 2>/dev/null
+fi
+
+if [[ -d %{_datarootdir}/fish/vendor_completions.d ]] ; then
+  %{name} --completion=fish 1> %{_datarootdir}/fish/vendor_completions.d/%{name}.fish 2>/dev/null
+fi
+
+if [[ -d %{_datadir}/zsh/site-functions ]] ; then
+  %{name} --completion=zsh 1> %{_datadir}/zsh/site-functions/_%{name} 2>/dev/null
+fi
+
+%postun
+if [[ $1 == 0 ]] ; then
+  if [[ -f %{_sysconfdir}/bash_completion.d/%{name} ]] ; then
+    rm -f %{_sysconfdir}/bash_completion.d/%{name} &>/dev/null || :
+  fi
+
+  if [[ -f %{_datarootdir}/fish/vendor_completions.d/%{name}.fish ]] ; then
+    rm -f %{_datarootdir}/fish/vendor_completions.d/%{name}.fish &>/dev/null || :
+  fi
+
+  if [[ -f %{_datadir}/zsh/site-functions/_%{name} ]] ; then
+    rm -f %{_datadir}/zsh/site-functions/_%{name} &>/dev/null || :
+  fi
+fi
+
 ################################################################################
 
 %files
@@ -58,6 +86,10 @@ rm -rf %{buildroot}
 ################################################################################
 
 %changelog
+* Thu Jun 13 2019 Anton Novojilov <andy@essentialkaos.com> - 3.1.0-0
+- ek package updated to the latest stable version
+- Added completion generation for bash, zsh and fish
+
 * Wed Oct 31 2018 Anton Novojilov <andy@essentialkaos.com> - 3.0.3-0
 - Fixed bug with Max/Mean/StDev/Perc calculation
 - Minor UI improvements

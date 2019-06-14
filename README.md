@@ -25,7 +25,7 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.7+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.10+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get github.com/essentialkaos/redis-latency-monitor
@@ -40,14 +40,14 @@ go get -u github.com/essentialkaos/redis-latency-monitor
 #### From ESSENTIAL KAOS Public repo for RHEL6/CentOS6
 
 ```bash
-[sudo] yum install -y https://yum.kaos.st/6/release/x86_64/kaos-repo-9.1-0.el6.noarch.rpm
+[sudo] yum install -y https://yum.kaos.st/kaos-repo-latest.el6.noarch.rpm
 [sudo] yum install redis-latency-monitor
 ```
 
 #### From ESSENTIAL KAOS Public repo for RHEL7/CentOS7
 
 ```bash
-[sudo] yum install -y https://yum.kaos.st/7/release/x86_64/kaos-repo-9.1-0.el7.noarch.rpm
+[sudo] yum install -y https://yum.kaos.st/kaos-repo-latest.el7.noarch.rpm
 [sudo] yum install redis-latency-monitor
 ```
 
