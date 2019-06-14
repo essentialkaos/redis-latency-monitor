@@ -25,7 +25,7 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.7+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.10+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get github.com/essentialkaos/redis-latency-monitor
