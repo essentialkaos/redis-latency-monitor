@@ -10,7 +10,7 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.1.0
+Version:         3.1.1
 Release:         0%{?dist}
 Group:           Applications/System
 License:         EKOL
@@ -20,7 +20,7 @@ Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.12
+BuildRequires:   golang >= 1.13
 
 Provides:        %{name} = %{version}-%{release}
 
@@ -86,6 +86,9 @@ fi
 ################################################################################
 
 %changelog
+* Thu Oct 17 2019 Anton Novojilov <andy@essentialkaos.com> - 3.1.1-0
+- ek package updated to the latest stable version
+
 * Thu Jun 13 2019 Anton Novojilov <andy@essentialkaos.com> - 3.1.0-0
 - ek package updated to the latest stable version
 - Added completion generation for bash, zsh and fish
