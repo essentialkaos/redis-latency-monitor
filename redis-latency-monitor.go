@@ -2,7 +2,7 @@ package main
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2018 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -17,17 +17,17 @@ import (
 	"strings"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v10/fmtc"
-	"pkg.re/essentialkaos/ek.v10/fmtutil"
-	"pkg.re/essentialkaos/ek.v10/fmtutil/table"
-	"pkg.re/essentialkaos/ek.v10/log"
-	"pkg.re/essentialkaos/ek.v10/mathutil"
-	"pkg.re/essentialkaos/ek.v10/options"
-	"pkg.re/essentialkaos/ek.v10/timeutil"
-	"pkg.re/essentialkaos/ek.v10/usage"
-	"pkg.re/essentialkaos/ek.v10/usage/completion/bash"
-	"pkg.re/essentialkaos/ek.v10/usage/completion/fish"
-	"pkg.re/essentialkaos/ek.v10/usage/completion/zsh"
+	"pkg.re/essentialkaos/ek.v11/fmtc"
+	"pkg.re/essentialkaos/ek.v11/fmtutil"
+	"pkg.re/essentialkaos/ek.v11/fmtutil/table"
+	"pkg.re/essentialkaos/ek.v11/log"
+	"pkg.re/essentialkaos/ek.v11/mathutil"
+	"pkg.re/essentialkaos/ek.v11/options"
+	"pkg.re/essentialkaos/ek.v11/timeutil"
+	"pkg.re/essentialkaos/ek.v11/usage"
+	"pkg.re/essentialkaos/ek.v11/usage/completion/bash"
+	"pkg.re/essentialkaos/ek.v11/usage/completion/fish"
+	"pkg.re/essentialkaos/ek.v11/usage/completion/zsh"
 
 	"github.com/essentialkaos/redis-latency-monitor/stats"
 )
@@ -37,7 +37,7 @@ import (
 // App info
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "3.1.0"
+	VER  = "3.1.1"
 	DESC = "Tiny Redis client for latency measurement"
 )
 
@@ -489,7 +489,7 @@ func showUsage() {
 func genUsage() *usage.Info {
 	info := usage.NewInfo("")
 
-	info.AddSpoiler("Utility show PING command latency or connection latency in milliseconds (one thousandth of a second).")
+	info.AddSpoiler("Utility shows PING command latency or connection latency in milliseconds (one thousandth of a second).")
 
 	info.AddOption(OPT_HOST, "Server hostname {s-}(127.0.0.1 by default){!}", "ip/host")
 	info.AddOption(OPT_PORT, "Server port {s-}(6379 by default){!}", "port")
