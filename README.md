@@ -3,7 +3,7 @@
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
 
 <p align="center">
-  <a href="https://travis-ci.org/essentialkaos/redis-latency-monitor"><img src="https://travis-ci.org/essentialkaos/redis-latency-monitor.svg"></a>
+  <a href="https://travis-ci.com/essentialkaos/redis-latency-monitor"><img src="https://travis-ci.com/essentialkaos/redis-latency-monitor.svg"></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/mdtoc"><img src="https://goreportcard.com/badge/github.com/essentialkaos/mdtoc"></a>
   <a href="https://codebeat.co/projects/github-com-essentialkaos-redis-latency-monitor-master"><img alt="codebeat badge" src="https://codebeat.co/badges/40d24053-129b-4407-97bd-adecc66c8903" /></a>
   <a href="https://essentialkaos.com/ekol"><img src="https://gh.kaos.st/ekol.svg"></a>
@@ -91,8 +91,8 @@ Examples
 
 | Branch | Status |
 |--------|--------|
-| `master` | [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.org/essentialkaos/redis-latency-monitor) |
-| `develop` | [![Build Status](https://travis-ci.org/essentialkaos/redis-latency-monitor.svg?branch=develop)](https://travis-ci.org/essentialkaos/redis-latency-monitor) |
+| `master` | [![Build Status](https://travis-ci.com/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.com/essentialkaos/redis-latency-monitor) |
+| `develop` | [![Build Status](https://travis-ci.com/essentialkaos/redis-latency-monitor.svg?branch=develop)](https://travis-ci.com/essentialkaos/redis-latency-monitor) |
 
 ### License
 
