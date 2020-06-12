@@ -42,7 +42,7 @@ go get -u github.com/essentialkaos/redis-latency-monitor
 #### From [ESSENTIAL KAOS Public Repository](https://yum.kaos.st)
 
 ```bash
-sudo yum install -y https://yum.kaos.st/kaos-repo-latest.el6.noarch.rpm
+sudo yum install -y https://yum.kaos.st/get/$(uname -r).rpm
 sudo yum install redis-latency-monitor
 ```
 
