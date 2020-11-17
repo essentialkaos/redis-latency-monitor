@@ -1,7 +1,7 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/redis-latency-monitor.svg"/></a></p>
 
 <p align="center">
-  <a href="https://travis-ci.com/essentialkaos/redis-latency-monitor"><img src="https://travis-ci.com/essentialkaos/redis-latency-monitor.svg"></a>
+  <a href="https://github.com/essentialkaos/redis-latency-monitor/actions"><img src="https://github.com/essentialkaos/redis-latency-monitor/workflows/CI/badge.svg" alt="GitHub Actions Status" /></a>
   <a href="https://github.com/essentialkaos/redis-latency-monitor/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/redis-latency-monitor/workflows/CodeQL/badge.svg" /></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/mdtoc"><img src="https://goreportcard.com/badge/github.com/essentialkaos/mdtoc"></a>
   <a href="https://codebeat.co/projects/github-com-essentialkaos-redis-latency-monitor-master"><img alt="codebeat badge" src="https://codebeat.co/badges/40d24053-129b-4407-97bd-adecc66c8903" /></a>
@@ -22,13 +22,7 @@ Tiny Redis client for latency measurement. Utility show `PING` command latency o
 
 #### From source
 
-Before the initial install allows git to use redirects for [pkg.re](https://github.com/essentialkaos/pkgre) service (reason why you should do this described [here](https://github.com/essentialkaos/pkgre#git-support)):
-
-```
-git config --global http.https://pkg.re.followRedirects true
-```
-
-To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.12+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.14+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get github.com/essentialkaos/redis-latency-monitor
@@ -87,8 +81,8 @@ Examples
 
 | Branch | Status |
 |--------|--------|
-| `master` | [![Build Status](https://travis-ci.com/essentialkaos/redis-latency-monitor.svg?branch=master)](https://travis-ci.com/essentialkaos/redis-latency-monitor) |
-| `develop` | [![Build Status](https://travis-ci.com/essentialkaos/redis-latency-monitor.svg?branch=develop)](https://travis-ci.com/essentialkaos/redis-latency-monitor) |
+| `master` | [![CI](https://github.com/essentialkaos/redis-latency-monitor/workflows/CI/badge.svg?branch=master)](https://github.com/essentialkaos/redis-latency-monitor/actions) |
+| `develop` | [![CI](https://github.com/essentialkaos/redis-latency-monitor/workflows/CI/badge.svg?branch=develop)](https://github.com/essentialkaos/redis-latency-monitor/actions) |
 
 ### License
 
