@@ -1,6 +1,11 @@
 <p align="center"><a href="#readme"><img src="https://gh.kaos.st/redis-latency-monitor.svg"/></a></p>
 
 <p align="center">
+  <a href="https://kaos.sh/w/redis-latency-monitor/ci"><img src="https://kaos.sh/w/redis-latency-monitor/ci.svg" alt="GitHub Actions CI Status" /></a>
+  <a href="https://kaos.sh/r/redis-latency-monitor"><img src="https://kaos.sh/r/redis-latency-monitor.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/b/redis-latency-monitor"><img src="https://kaos.sh/b/40d24053-129b-4407-97bd-adecc66c8903.svg" alt="codebeat badge" /></a>
+  <a href="https://kaos.sh/w/redis-latency-monitor/codeql"><img src="https://kaos.sh/w/redis-latency-monitor/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
+
   <a href="https://github.com/essentialkaos/redis-latency-monitor/actions"><img src="https://github.com/essentialkaos/redis-latency-monitor/workflows/CI/badge.svg" alt="GitHub Actions Status" /></a>
   <a href="https://github.com/essentialkaos/redis-latency-monitor/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/redis-latency-monitor/workflows/CodeQL/badge.svg" /></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/mdtoc"><img src="https://goreportcard.com/badge/github.com/essentialkaos/mdtoc"></a>
@@ -22,7 +27,7 @@ Tiny Redis client for latency measurement. Utility show `PING` command latency o
 
 #### From source
 
-To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.14+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.16+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get github.com/essentialkaos/redis-latency-monitor
@@ -81,8 +86,8 @@ Examples
 
 | Branch | Status |
 |--------|--------|
-| `master` | [![CI](https://github.com/essentialkaos/redis-latency-monitor/workflows/CI/badge.svg?branch=master)](https://github.com/essentialkaos/redis-latency-monitor/actions) |
-| `develop` | [![CI](https://github.com/essentialkaos/redis-latency-monitor/workflows/CI/badge.svg?branch=develop)](https://github.com/essentialkaos/redis-latency-monitor/actions) |
+| `master` | [![CI](https://kaos.sh/w/redis-latency-monitor/ci.svg?branch=master)](https://kaos.sh/w/redis-latency-monitor/ci?query=branch:master) |
+| `develop` | [![CI](https://kaos.sh/w/redis-latency-monitor/ci.svg?branch=master)](https://kaos.sh/w/redis-latency-monitor/ci?query=branch:develop) |
 
 ### License
 
