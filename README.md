@@ -48,7 +48,7 @@ sudo yum install redis-latency-monitor
 
 #### Prebuilt binaries
 
-You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.st/redis-latency-monitor/latest).
+You can download prebuilt binaries for Linux and macOS from [EK Apps Repository](https://apps.kaos.st/redis-latency-monitor/latest).
 
 ### Usage
 
