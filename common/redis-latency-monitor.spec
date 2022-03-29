@@ -10,7 +10,7 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.2.11
+Version:         3.2.1
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
