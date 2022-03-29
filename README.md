@@ -27,7 +27,7 @@ Tiny Redis client for latency measurement. Utility show `PING` command latency o
 
 #### From source
 
-To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.16+ workspace (_[instructions](https://golang.org/doc/install)_), then:
+To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.17+ workspace (_[instructions](https://golang.org/doc/install)_), then:
 
 ```
 go get github.com/essentialkaos/redis-latency-monitor
