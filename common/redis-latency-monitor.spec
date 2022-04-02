@@ -10,17 +10,17 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.2.0
+Version:         3.2.1
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
-URL:             https://github.com/essentialkaos/redis-latency-monitor
+URL:             https://kaos.sh/redis-latency-monitor
 
 Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.13
+BuildRequires:   golang >= 1.17
 
 Provides:        %{name} = %{version}-%{release}
 
@@ -37,7 +37,9 @@ or connection latency in milliseconds (one thousandth of a second).
 
 %build
 export GOPATH=$(pwd)
-go build src/github.com/essentialkaos/%{name}/%{name}.go
+pushd src/github.com/essentialkaos/%{name}
+  go build -mod vendor -o $GOPATH/%{name} %{name}.go
+popd
 
 %install
 rm -rf %{buildroot}
@@ -86,6 +88,12 @@ fi
 ################################################################################
 
 %changelog
+* Wed Mar 30 2022 Anton Novojilov <andy@essentialkaos.com> - 3.2.1-0
+- Package ek updated to the latest stable version
+- Removed pkg.re usage
+- Added module info
+- Added Dependabot configuration
+
 * Mon Oct 21 2019 Anton Novojilov <andy@essentialkaos.com> - 3.2.0-0
 - Improved UI
 
