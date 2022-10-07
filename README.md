@@ -5,11 +5,6 @@
   <a href="https://kaos.sh/r/redis-latency-monitor"><img src="https://kaos.sh/r/redis-latency-monitor.svg" alt="GoReportCard" /></a>
   <a href="https://kaos.sh/b/redis-latency-monitor"><img src="https://kaos.sh/b/40d24053-129b-4407-97bd-adecc66c8903.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/w/redis-latency-monitor/codeql"><img src="https://kaos.sh/w/redis-latency-monitor/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
-
-  <a href="https://github.com/essentialkaos/redis-latency-monitor/actions"><img src="https://github.com/essentialkaos/redis-latency-monitor/workflows/CI/badge.svg" alt="GitHub Actions Status" /></a>
-  <a href="https://github.com/essentialkaos/redis-latency-monitor/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/redis-latency-monitor/workflows/CodeQL/badge.svg" /></a>
-  <a href="https://goreportcard.com/report/github.com/essentialkaos/mdtoc"><img src="https://goreportcard.com/badge/github.com/essentialkaos/mdtoc"></a>
-  <a href="https://codebeat.co/projects/github-com-essentialkaos-redis-latency-monitor-master"><img alt="codebeat badge" src="https://codebeat.co/badges/40d24053-129b-4407-97bd-adecc66c8903" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
