@@ -2,4 +2,4 @@ module github.com/essentialkaos/redis-latency-monitor
 
 go 1.17
 
-require github.com/essentialkaos/ek/v12 v12.62.0
+require github.com/essentialkaos/ek/v12 v12.63.0
