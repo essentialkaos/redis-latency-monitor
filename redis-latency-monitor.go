@@ -41,7 +41,7 @@ const (
 	DESC = "Tiny Redis client for latency measurement"
 )
 
-// Main constatnts
+// Main constants
 const (
 	LATENCY_SAMPLE_RATE int = 10
 	CONNECT_SAMPLE_RATE     = 100
