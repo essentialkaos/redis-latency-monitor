@@ -74,8 +74,6 @@ jobs:
     name: Typos
     runs-on: ubuntu-latest
 
-    continue-on-error: true
-
     needs: Go
 
     steps:
@@ -83,4 +81,5 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Check spelling
+        continue-on-error: true
         uses: crate-ci/typos@master
