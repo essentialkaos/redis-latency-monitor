@@ -6,8 +6,8 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.2.1
-Release:         1%{?dist}
+Version:         3.2.2
+Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
 URL:             https://kaos.sh/redis-latency-monitor
@@ -16,7 +16,7 @@ Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.19
+BuildRequires:   golang >= 1.21
 
 Provides:        %{name} = %{version}-%{release}
 
@@ -89,6 +89,11 @@ fi
 ################################################################################
 
 %changelog
+* Thu Mar 28 2024 Anton Novojilov <andy@essentialkaos.com> - 3.2.2-0
+- Improved support information gathering
+- Code refactoring
+- Dependencies update
+
 * Wed Nov 30 2022 Anton Novojilov <andy@essentialkaos.com> - 3.2.1-1
 - Fixed build using sources from source.kaos.st
 
