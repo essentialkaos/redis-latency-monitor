@@ -34,6 +34,7 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/completion/fish"
 	"github.com/essentialkaos/ek/v12/usage/completion/zsh"
 	"github.com/essentialkaos/ek/v12/usage/man"
+	"github.com/essentialkaos/ek/v12/usage/update"
 
 	"github.com/essentialkaos/redis-latency-monitor/stats"
 )
@@ -97,16 +98,29 @@ var optMap = options.Map{
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
+// colorTagApp contains color tag for app name
+var colorTagApp string
+
+// colorTagVer contains color tag for app version
+var colorTagVer string
+
 // pingCommand is PING command data
 var pingCommand = []byte("PING\r\n")
 
-var (
-	conn         net.Conn
-	host         string
-	timeout      time.Duration
-	outputWriter *bufio.Writer
-	errorLogged  bool
-)
+// conn is connection to Redis
+var conn net.Conn
+
+// host is Redis host
+var host string
+
+// timeout is connection timeout
+var timeout time.Duration
+
+// outputWriter is buffered output writer
+var outputWriter *bufio.Writer
+
+// errorLogged is error logging flag
+var errorLogged bool
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -160,6 +174,15 @@ func Run(gitRev string, gomod []byte) {
 func preConfigureUI() {
 	if !tty.IsTTY() {
 		fmtc.DisableColors = true
+	}
+
+	switch {
+	case fmtc.IsTrueColorSupported():
+		colorTagApp, colorTagVer = "{*}{#DC382C}", "{#A32422}"
+	case fmtc.Is256ColorsSupported():
+		colorTagApp, colorTagVer = "{*}{#160}", "{#124}"
+	default:
+		colorTagApp, colorTagVer = "{r*}", "{r}"
 	}
 }
 
@@ -567,6 +590,8 @@ func printMan() {
 func genUsage() *usage.Info {
 	info := usage.NewInfo()
 
+	info.AppNameColorTag = colorTagApp
+
 	info.AddSpoiler("Utility shows PING command latency or connection latency in milliseconds (one thousandth of a second).")
 
 	info.AddOption(OPT_HOST, "Server hostname {s-}(127.0.0.1 by default){!}", "ip/host")
@@ -604,10 +629,18 @@ func genAbout(gitRev string) *usage.About {
 		Year:    2006,
 		Owner:   "ESSENTIAL KAOS",
 		License: "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
+
+		AppNameColorTag: colorTagApp,
+		VersionColorTag: colorTagVer,
+		DescSeparator:   "{s}—{!}",
 	}
 
 	if gitRev != "" {
 		about.Build = "git:" + gitRev
+		about.UpdateChecker = usage.UpdateChecker{
+			"essentialkaos/redis-latency-monitor",
+			update.GitHubChecker,
+		}
 	}
 
 	return about
