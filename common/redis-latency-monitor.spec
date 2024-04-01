@@ -1,16 +1,12 @@
 ################################################################################
 
-# rpmbuilder:relative-pack true
-
-################################################################################
-
 %define  debug_package %{nil}
 
 ################################################################################
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.2.1
+Version:         3.2.2
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
@@ -20,7 +16,7 @@ Source0:         https://source.kaos.st/%{name}/%{name}-%{version}.tar.bz2
 
 BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   golang >= 1.17
+BuildRequires:   golang >= 1.21
 
 Provides:        %{name} = %{version}-%{release}
 
@@ -36,16 +32,21 @@ or connection latency in milliseconds (one thousandth of a second).
 %setup -q
 
 %build
-export GOPATH=$(pwd)
-pushd src/github.com/essentialkaos/%{name}
-  go build -mod vendor -o $GOPATH/%{name} %{name}.go
+if [[ ! -d "%{name}/vendor" ]] ; then
+  echo "This package requires vendored dependencies"
+  exit 1
+fi
+
+pushd %{name}
+  go build %{name}.go
+  cp LICENSE ..
 popd
 
 %install
 rm -rf %{buildroot}
 
 install -dm 755 %{buildroot}%{_bindir}
-install -pm 755 %{name} %{buildroot}%{_bindir}/
+install -pm 755 %{name}/%{name} %{buildroot}%{_bindir}/
 
 %clean
 rm -rf %{buildroot}
@@ -88,6 +89,14 @@ fi
 ################################################################################
 
 %changelog
+* Thu Mar 28 2024 Anton Novojilov <andy@essentialkaos.com> - 3.2.2-0
+- Improved support information gathering
+- Code refactoring
+- Dependencies update
+
+* Wed Nov 30 2022 Anton Novojilov <andy@essentialkaos.com> - 3.2.1-1
+- Fixed build using sources from source.kaos.st
+
 * Wed Mar 30 2022 Anton Novojilov <andy@essentialkaos.com> - 3.2.1-0
 - Package ek updated to the latest stable version
 - Removed pkg.re usage
