@@ -592,7 +592,7 @@ func genUsage() *usage.Info {
 
 	info.AppNameColorTag = colorTagApp
 
-	info.AddSpoiler("Utility shows PING command latency or connection latency in milliseconds (one thousandth of a second).")
+	info.AddSpoiler("{&}Utility shows PING command latency or connection latency in milliseconds (one thousandth\nof a second).{!}")
 
 	info.AddOption(OPT_HOST, "Server hostname {s-}(127.0.0.1 by default){!}", "ip/host")
 	info.AddOption(OPT_PORT, "Server port {s-}(6379 by default){!}", "port")
