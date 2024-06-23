@@ -6,7 +6,7 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.2.2
+Version:         3.2.3
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
@@ -29,14 +29,17 @@ or connection latency in milliseconds (one thousandth of a second).
 ################################################################################
 
 %prep
-%setup -q
 
-%build
+%setup -q
 if [[ ! -d "%{name}/vendor" ]] ; then
-  echo "This package requires vendored dependencies"
+  echo -e "----\nThis package requires vendored dependencies\n----"
+  exit 1
+elif [[ -f "%{name}/%{name}" ]] ; then
+  echo -e "----\nSources must not contain precompiled binaries\n----"
   exit 1
 fi
 
+%build
 pushd %{name}
   go build %{name}.go
   cp LICENSE ..
@@ -89,6 +92,10 @@ fi
 ################################################################################
 
 %changelog
+* Sun Jun 23 2024 Anton Novojilov <andy@essentialkaos.com> - 3.2.3-0
+- Code refactoring
+- Dependencies update
+
 * Thu Mar 28 2024 Anton Novojilov <andy@essentialkaos.com> - 3.2.2-0
 - Improved support information gathering
 - Code refactoring
