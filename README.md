@@ -21,7 +21,7 @@ Tiny Redis client for latency measurement. Utility show `PING` command latency o
 
 #### From source
 
-To build the `redis-latency-monitor` from scratch, make sure you have a working Go 1.21+ workspace (_[instructions](https://go.dev/doc/install)_), then:
+To build the `redis-latency-monitor` from scratch, make sure you have a working [Go 1.22+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace (_[instructions](https://go.dev/doc/install)_), then:
 
 ```
 go install github.com/essentialkaos/redis-latency-monitor@latest
@@ -30,8 +30,8 @@ go install github.com/essentialkaos/redis-latency-monitor@latest
 #### From [ESSENTIAL KAOS Public Repository](https://kaos.sh/kaos-repo)
 
 ```bash
-sudo yum install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
-sudo yum install redis-latency-monitor
+sudo dnf install -y https://pkgs.kaos.st/kaos-repo-latest.el$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5).noarch.rpm
+sudo dnf install redis-latency-monitor
 ```
 
 #### Prebuilt binaries
