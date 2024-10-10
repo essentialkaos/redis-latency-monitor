@@ -3,7 +3,6 @@
 <p align="center">
   <a href="https://kaos.sh/w/redis-latency-monitor/ci"><img src="https://kaos.sh/w/redis-latency-monitor/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/r/redis-latency-monitor"><img src="https://kaos.sh/r/redis-latency-monitor.svg" alt="GoReportCard" /></a>
-  <a href="https://kaos.sh/b/redis-latency-monitor"><img src="https://kaos.sh/b/40d24053-129b-4407-97bd-adecc66c8903.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/w/redis-latency-monitor/codeql"><img src="https://kaos.sh/w/redis-latency-monitor/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
