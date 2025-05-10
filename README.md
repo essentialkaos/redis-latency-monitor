@@ -1,8 +1,8 @@
 <p align="center"><a href="#readme"><img src=".github/images/card.svg"/></a></p>
 
 <p align="center">
-  <a href="https://kaos.sh/w/redis-latency-monitor/ci"><img src="https://kaos.sh/w/redis-latency-monitor/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/r/redis-latency-monitor"><img src="https://kaos.sh/r/redis-latency-monitor.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/w/redis-latency-monitor/ci"><img src="https://kaos.sh/w/redis-latency-monitor/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/redis-latency-monitor/codeql"><img src="https://kaos.sh/w/redis-latency-monitor/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
@@ -15,7 +15,7 @@ Tiny Redis client for latency measurement. Utility show `PING` command latency o
 
 ### Usage demo
 
-[![demo](https://gh.kaos.st/redis-latency-monitor-301.gif)](#usage-demo)
+[![demo](https://github.com/user-attachments/assets/00d5a524-8379-49bd-b43a-2831efa7c0da)](#usage-demo)
 
 ### Installation
 
@@ -49,8 +49,12 @@ You can download prebuilt binaries for Linux and macOS from [EK Apps Repository]
 | `master` | [![CI](https://kaos.sh/w/redis-latency-monitor/ci.svg?branch=master)](https://kaos.sh/w/redis-latency-monitor/ci?query=branch:master) |
 | `develop` | [![CI](https://kaos.sh/w/redis-latency-monitor/ci.svg?branch=master)](https://kaos.sh/w/redis-latency-monitor/ci?query=branch:develop) |
 
+### Contributing
+
+Before contributing to this project please read our [Contributing Guidelines](https://github.com/essentialkaos/.github/blob/master/CONTRIBUTING.md).
+
 ### License
 
 [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-<p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.st/ekgh.svg"/></a></p>
+<p align="center"><a href="https://kaos.dev"><img src="https://raw.githubusercontent.com/essentialkaos/.github/refs/heads/master/images/ekgh.svg"/></a></p>
