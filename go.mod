@@ -1,6 +1,6 @@
 module github.com/essentialkaos/redis-latency-monitor
 
-go 1.23.6
+go 1.23.8
 
 require github.com/essentialkaos/ek/v13 v13.26.1
 
