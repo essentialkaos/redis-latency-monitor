@@ -66,7 +66,7 @@ const (
 	OPT_AUTH       = "a:password"
 	OPT_TIMEOUT    = "t:timeout"
 	OPT_INTERVAL   = "i:interval"
-	OPT_CONNECT    = "c:connect"
+	OPT_CONNECT    = "C:connect"
 	OPT_TIMESTAMPS = "T:timestamps"
 	OPT_OUTPUT     = "o:output"
 	OPT_ERROR_LOG  = "e:error-log"
@@ -559,13 +559,13 @@ func getServerVersionInfo() support.App {
 		name = "Redis"
 		cmd = exec.Command("redis-server", "--version")
 	default:
-		return support.App{"Redis", ""}
+		return support.App{}
 	}
 
 	output, err := cmd.Output()
 
 	if err != nil {
-		return support.App{name, ""}
+		return support.App{}
 	}
 
 	switch name {
