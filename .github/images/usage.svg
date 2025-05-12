@@ -73,10 +73,10 @@
   <text x="12" y="420">  <tspan class="g">--version</tspan><tspan class="s">, </tspan><tspan class="g">-v</tspan> <tspan class="d">............</tspan> Show version</text>
   <text x="12" y="460"><tspan class="BB">Examples</tspan></text>
   <text x="12" y="500">  redis-latency-monitor -h 192.168.0.123 -p 6821 -t 15</text>
-  <text x="12" y="520">  <tspan class="II d">Start monitoring instance on 192.168.0.123:6821 with 15 second timeout</tspan></text>
-  <text x="12" y="560">  redis-latency-monitor -c -i 15 -o latency.csv</text>
-  <text x="12" y="580">  <tspan class="II d">Start connection latency monitoring with 15 second interval and save result to CSV</tspan></text>
-  <text x="12" y="600"><tspan class="II d">  file</tspan></text>
+  <text x="12" y="520">  <tspan class="II d">Start monitoring the instance at 192.168.0.123:6821 with a 15-second intervals</tspan></text>
+  <text x="12" y="560">  redis-latency-monitor -C -i 15 -o latency.csv</text>
+  <text x="12" y="580">  <tspan class="II d">Start monitoring connection latency with a 15-second intervals and save the results</tspan></text>
+  <text x="12" y="600"><tspan class="II d">  to a CSV file</tspan></text>
 
   <rect x="800" y="36" width="30.3" height="582" fill="url(#fog)"/>
 </svg>

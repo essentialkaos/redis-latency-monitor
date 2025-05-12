@@ -632,12 +632,12 @@ func genUsage() *usage.Info {
 
 	info.AddExample(
 		"-h 192.168.0.123 -p 6821 -t 15",
-		"Start monitoring instance on 192.168.0.123:6821 with 15 second timeout",
+		"Start monitoring the instance at 192.168.0.123:6821 with a 15-second intervals",
 	)
 
 	info.AddExample(
-		"-c -i 15 -o latency.csv",
-		"Start connection latency monitoring with 15 second interval and save result to CSV file",
+		"-C -i 15 -o latency.csv",
+		"Start monitoring connection latency with a 15-second intervals and save the results to a CSV file",
 	)
 
 	return info
