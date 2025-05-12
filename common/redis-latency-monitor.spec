@@ -94,6 +94,7 @@ fi
 
 %changelog
 * Mon May 12 2025 Anton Novojilov <andy@essentialkaos.com> - 3.3.0-0
+- Short version of option '--connect' changed from '-c' to '-C'
 - Improved Valkey support
 - UI improvements
 - Code refactoring
