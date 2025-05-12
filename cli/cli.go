@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -18,24 +18,26 @@ import (
 	"strings"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/fmtc"
-	"github.com/essentialkaos/ek/v12/fmtutil"
-	"github.com/essentialkaos/ek/v12/fmtutil/table"
-	"github.com/essentialkaos/ek/v12/log"
-	"github.com/essentialkaos/ek/v12/mathutil"
-	"github.com/essentialkaos/ek/v12/options"
-	"github.com/essentialkaos/ek/v12/strutil"
-	"github.com/essentialkaos/ek/v12/support"
-	"github.com/essentialkaos/ek/v12/support/deps"
-	"github.com/essentialkaos/ek/v12/terminal"
-	"github.com/essentialkaos/ek/v12/terminal/tty"
-	"github.com/essentialkaos/ek/v12/timeutil"
-	"github.com/essentialkaos/ek/v12/usage"
-	"github.com/essentialkaos/ek/v12/usage/completion/bash"
-	"github.com/essentialkaos/ek/v12/usage/completion/fish"
-	"github.com/essentialkaos/ek/v12/usage/completion/zsh"
-	"github.com/essentialkaos/ek/v12/usage/man"
-	"github.com/essentialkaos/ek/v12/usage/update"
+	"github.com/essentialkaos/ek/v13/errors"
+	"github.com/essentialkaos/ek/v13/fmtc"
+	"github.com/essentialkaos/ek/v13/fmtutil"
+	"github.com/essentialkaos/ek/v13/fmtutil/table"
+	"github.com/essentialkaos/ek/v13/log"
+	"github.com/essentialkaos/ek/v13/mathutil"
+	"github.com/essentialkaos/ek/v13/options"
+	"github.com/essentialkaos/ek/v13/signal"
+	"github.com/essentialkaos/ek/v13/strutil"
+	"github.com/essentialkaos/ek/v13/support"
+	"github.com/essentialkaos/ek/v13/support/deps"
+	"github.com/essentialkaos/ek/v13/terminal"
+	"github.com/essentialkaos/ek/v13/terminal/tty"
+	"github.com/essentialkaos/ek/v13/timeutil"
+	"github.com/essentialkaos/ek/v13/usage"
+	"github.com/essentialkaos/ek/v13/usage/completion/bash"
+	"github.com/essentialkaos/ek/v13/usage/completion/fish"
+	"github.com/essentialkaos/ek/v13/usage/completion/zsh"
+	"github.com/essentialkaos/ek/v13/usage/man"
+	"github.com/essentialkaos/ek/v13/usage/update"
 
 	"github.com/essentialkaos/redis-latency-monitor/stats"
 )
@@ -45,8 +47,8 @@ import (
 // App info
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "3.2.3"
-	DESC = "Tiny Redis client for latency measurement"
+	VER  = "3.3.0"
+	DESC = "Tiny Valkey/Redis client for latency measurement"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -54,7 +56,7 @@ const (
 // Main constants
 const (
 	LATENCY_SAMPLE_RATE int = 10
-	CONNECT_SAMPLE_RATE     = 100
+	CONNECT_SAMPLE_RATE int = 100
 )
 
 // Options
@@ -64,7 +66,7 @@ const (
 	OPT_AUTH       = "a:password"
 	OPT_TIMEOUT    = "t:timeout"
 	OPT_INTERVAL   = "i:interval"
-	OPT_CONNECT    = "c:connect"
+	OPT_CONNECT    = "C:connect"
 	OPT_TIMESTAMPS = "T:timestamps"
 	OPT_OUTPUT     = "o:output"
 	OPT_ERROR_LOG  = "e:error-log"
@@ -108,10 +110,10 @@ var colorTagVer string
 // pingCommand is PING command data
 var pingCommand = []byte("PING\r\n")
 
-// conn is connection to Redis
+// conn is connection to server
 var conn net.Conn
 
-// host is Redis host
+// host is server host
 var host string
 
 // timeout is connection timeout
@@ -135,7 +137,7 @@ func Run(gitRev string, gomod []byte) {
 
 	if !errs.IsEmpty() {
 		terminal.Error("Options parsing errors:")
-		terminal.Error(errs.String())
+		terminal.Error(errs.Error(" - "))
 		os.Exit(1)
 	}
 
@@ -154,7 +156,7 @@ func Run(gitRev string, gomod []byte) {
 		support.Collect(APP, VER).
 			WithRevision(gitRev).
 			WithDeps(deps.Extract(gomod)).
-			WithApps(getRedisVersionInfo()).
+			WithApps(getServerVersionInfo()).
 			Print()
 		os.Exit(0)
 	case options.GetB(OPT_HELP), options.GetS(OPT_HOST) == "true":
@@ -162,11 +164,17 @@ func Run(gitRev string, gomod []byte) {
 		os.Exit(0)
 	}
 
-	if options.Has(OPT_ERROR_LOG) {
-		setupErrorLog()
-	}
+	err := errors.Chain(
+		setupErrorLog,
+		createOutputWriter,
+		setupSignalHandlers,
+		startMeasurementProcess,
+	)
 
-	startMeasurementProcess()
+	if err != nil {
+		terminal.Error(err.Error())
+		os.Exit(1)
+	}
 }
 
 // preConfigureUI preconfigures UI based on information about user terminal
@@ -192,17 +200,53 @@ func configureUI() {
 	}
 }
 
-// setupErrorLog setup error log
-func setupErrorLog() {
+// setupErrorLog setups error log
+func setupErrorLog() error {
+	if !options.Has(OPT_ERROR_LOG) {
+		return nil
+	}
+
 	err := log.Set(options.GetS(OPT_ERROR_LOG), 0644)
 
 	if err != nil {
-		printErrorAndExit(err.Error())
+		return fmt.Errorf("Can't setup error log: %w", err)
 	}
+
+	return nil
 }
 
-// startMeasurementProcess start measurement process
-func startMeasurementProcess() {
+// createOutputWriter creates and opens file for writing data
+func createOutputWriter() error {
+	if !options.Has(OPT_OUTPUT) {
+		return nil
+	}
+
+	fd, err := os.OpenFile(options.GetS(OPT_OUTPUT), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+
+	if err != nil {
+		return fmt.Errorf("Can't open output file: %w", err)
+	}
+
+	outputWriter = bufio.NewWriter(fd)
+
+	go flushOutput(250 * time.Millisecond)
+
+	return nil
+}
+
+// setupSignalHandlers setups signals handler
+func setupSignalHandlers() error {
+	signal.Handlers{
+		signal.INT:  signalHandler,
+		signal.TERM: signalHandler,
+		signal.QUIT: signalHandler,
+	}.TrackAsync()
+
+	return nil
+}
+
+// startMeasurementProcess starts measurement process
+func startMeasurementProcess() error {
 	prettyOutput := !options.Has(OPT_OUTPUT)
 	interval := time.Duration(options.GetI(OPT_INTERVAL)) * time.Second
 
@@ -210,68 +254,45 @@ func startMeasurementProcess() {
 	timeout = time.Second * time.Duration(options.GetI(OPT_TIMEOUT))
 
 	if !options.GetB(OPT_CONNECT) {
-		connectToRedis(false)
-	}
+		err := connectToServer()
 
-	if options.Has(OPT_OUTPUT) {
-		createOutputWriter()
+		if err != nil {
+			return err
+		}
 	}
 
 	measureLatency(interval, prettyOutput)
+
+	return nil
 }
 
-// createOutputWriter create and open file for writing data
-func createOutputWriter() {
-	fd, err := os.OpenFile(options.GetS(OPT_OUTPUT), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-
-	if err != nil {
-		printErrorAndExit(err.Error())
-	}
-
-	outputWriter = bufio.NewWriter(fd)
-
-	go flushOutput(250 * time.Millisecond)
-}
-
-// connectToRedis connect to redis instance
-func connectToRedis(reconnect bool) error {
+// connectToServer connects to server
+func connectToServer() error {
 	var err error
 
 	conn, err = net.DialTimeout("tcp", host, timeout)
 
 	if err != nil {
-		if !reconnect {
-			printErrorAndExit("Can't connect to Redis on %s", host)
-		} else {
-			return err
-		}
+		return fmt.Errorf("Can't connect to server on %s: %w", host, err)
 	}
 
 	if options.GetS(OPT_AUTH) != "" {
-		_, err = conn.Write([]byte("AUTH " + options.GetS(OPT_AUTH) + "\r\n"))
+		_, err = fmt.Fprintf(conn, "AUTH %s\r\n", options.GetS(OPT_AUTH))
 
 		if err != nil {
-			if !reconnect {
-				printErrorAndExit("Can't send AUTH command")
-			} else {
-				return err
-			}
+			return fmt.Errorf("Can't send AUTH command: %w", err)
 		}
 	}
 
 	return nil
 }
 
-// measureLatency measure latency
+// measureLatency measures latency
 func measureLatency(interval time.Duration, prettyOutput bool) {
-	var (
-		measurements   stats.Data
-		count, pointer int
-		t              *table.Table
-		sampleRate     int
-		errors         int
-		buf            *bufio.Reader
-	)
+	var measurements stats.Data
+	var count, pointer, sampleRate, errorNum int
+	var t *table.Table
+	var buf *bufio.Reader
 
 	if prettyOutput {
 		t = createOutputTable()
@@ -290,15 +311,13 @@ func measureLatency(interval time.Duration, prettyOutput bool) {
 
 	last := alignTime()
 
-	for {
-		time.Sleep(time.Duration(sampleRate) * time.Millisecond)
-
+	for range time.NewTicker(time.Duration(sampleRate) * time.Millisecond).C {
 		start := time.Now()
 
 		if connect {
-			errors += makeConnection()
+			errorNum += makeConnection()
 		} else {
-			errors += execCommand(buf)
+			errorNum += execCommand(buf)
 		}
 
 		dur := uint64(time.Since(start) / time.Microsecond)
@@ -307,7 +326,7 @@ func measureLatency(interval time.Duration, prettyOutput bool) {
 		if time.Since(last) >= interval {
 			last = start
 
-			printMeasurements(t, errors, measurements[:pointer], prettyOutput)
+			printMeasurements(t, errorNum, measurements[:pointer], prettyOutput)
 
 			if prettyOutput {
 				count++
@@ -318,18 +337,17 @@ func measureLatency(interval time.Duration, prettyOutput bool) {
 				}
 			}
 
-			errors = 0
-			pointer = 0
+			errorNum, pointer = 0, 0
 		} else {
 			pointer++
 		}
 	}
 }
 
-// execCommand execute command and read output
+// execCommand executes command and reads the output
 func execCommand(buf *bufio.Reader) int {
 	if conn == nil {
-		if connectToRedis(true) != nil {
+		if connectToServer() != nil {
 			return 1
 		}
 	}
@@ -365,7 +383,7 @@ func execCommand(buf *bufio.Reader) int {
 	return 0
 }
 
-// makeConnection create and close connection to Redis
+// makeConnection creates and closes connection to server to check connect latency
 func makeConnection() int {
 	var err error
 
@@ -387,8 +405,8 @@ func makeConnection() int {
 	return 0
 }
 
-// printMeasurements calculate and print measurements
-func printMeasurements(t *table.Table, errors int, measurements stats.Data, prettyOutput bool) {
+// printMeasurements calculates and prints measurements
+func printMeasurements(t *table.Table, errorNum int, measurements stats.Data, prettyOutput bool) {
 	measurements.Sort()
 
 	min := stats.Min(measurements)
@@ -397,42 +415,42 @@ func printMeasurements(t *table.Table, errors int, measurements stats.Data, pret
 	sdv := stats.StandardDeviation(measurements)
 	p95 := stats.Percentile(measurements, 95.0)
 	p99 := stats.Percentile(measurements, 99.0)
+	errs := fmtutil.PrettyNum(errorNum)
+
+	if errorNum > 0 {
+		errs = "{r}" + errs + "{!}"
+	}
 
 	if prettyOutput {
 		t.Print(
-			timeutil.Format(time.Now(), "%H:%M:%S{s-}.%K{!}"),
-			fmtutil.PrettyNum(len(measurements)),
-			fmtutil.PrettyNum(errors),
+			timeutil.Format(time.Now(), "%H{s}:{!}%M{s}:{!}%S{s-}.%K{!}"),
+			fmtutil.PrettyNum(len(measurements)), errs,
 			formatNumber(min), formatNumber(max),
 			formatNumber(men), formatNumber(sdv),
 			formatNumber(p95), formatNumber(p99),
 		)
 	} else {
 		if options.GetB(OPT_TIMESTAMPS) {
-			outputWriter.WriteString(
-				fmt.Sprintf(
-					"%d;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
-					time.Now().Unix(), len(measurements), errors,
-					usToMs(min), usToMs(max), usToMs(men),
-					usToMs(sdv), usToMs(p95), usToMs(p99),
-				),
+			fmt.Fprintf(outputWriter,
+				"%d;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+				time.Now().Unix(), len(measurements), errorNum,
+				usToMs(min), usToMs(max), usToMs(men),
+				usToMs(sdv), usToMs(p95), usToMs(p99),
 			)
 		} else {
-			outputWriter.WriteString(
-				fmt.Sprintf(
-					"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
-					timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
-					len(measurements), errors,
-					usToMs(min), usToMs(max), usToMs(men),
-					usToMs(sdv), usToMs(p95), usToMs(p99),
-				),
+			fmt.Fprintf(outputWriter,
+				"%s;%d;%d;%.03f;%.03f;%.03f;%.03f;%.03f;%.03f;\n",
+				timeutil.Format(time.Now(), "%Y/%m/%d %H:%M:%S.%K"),
+				len(measurements), errorNum,
+				usToMs(min), usToMs(max), usToMs(men),
+				usToMs(sdv), usToMs(p95), usToMs(p99),
 			)
 		}
 
 	}
 }
 
-// formatNumber format floating number
+// formatNumber formats floating number
 func formatNumber(value uint64) string {
 	if value == 0 {
 		return "{s-}------{!}"
@@ -459,12 +477,12 @@ func formatNumber(value uint64) string {
 	}
 }
 
-// usToMs convert us in uint64 to ms in float64
+// usToMs converts us in uint64 to ms in float64
 func usToMs(us uint64) float64 {
 	return float64(us) / 1000.0
 }
 
-// createOutputTable create and configure output table struct
+// createOutputTable creates and configures output table struct
 func createOutputTable() *table.Table {
 	t := table.NewTable(
 		"TIME", "SAMPLES", "ERRORS", "MIN", "MAX",
@@ -472,6 +490,7 @@ func createOutputTable() *table.Table {
 	)
 
 	t.SetSizes(12, 8, 8, 8, 10, 8, 8, 8)
+	t.Width = 110
 
 	t.SetAlignments(
 		table.ALIGN_RIGHT, table.ALIGN_RIGHT, table.ALIGN_RIGHT,
@@ -482,31 +501,27 @@ func createOutputTable() *table.Table {
 	return t
 }
 
-// alignTime block main thread until nearest interval start point
+// alignTime blocks main thread until start of the minute
 func alignTime() time.Time {
-	interval := options.GetI(OPT_INTERVAL)
+	var pause time.Duration
 
-	for {
-		now := time.Now()
-
-		if interval >= 60 {
-			if now.Second() == 0 {
-				return now
-			}
-		} else {
-			if now.Second()%interval == 0 {
-				return now
-			}
-		}
-
-		time.Sleep(10 * time.Millisecond)
+	if options.GetI(OPT_INTERVAL) >= 60 {
+		pause = time.Minute
+	} else {
+		pause = time.Duration(options.GetI(OPT_INTERVAL)) * time.Second
 	}
+
+	waitDur := time.Until(time.Now().Truncate(pause).Add(pause))
+
+	time.Sleep(waitDur)
+
+	return time.Now()
 }
 
-// createMeasurementsSlice create float64 slice for measurements
+// createMeasurementsSlice creates float64 slice for measurements
 func createMeasurementsSlice(sampleRate int) []uint64 {
 	size := (options.GetI(OPT_INTERVAL) * 1000) / sampleRate
-	return make(stats.Data, size)
+	return make(stats.Data, size+sampleRate)
 }
 
 // flushOutput is function for flushing output
@@ -516,14 +531,8 @@ func flushOutput(interval time.Duration) {
 	}
 }
 
-// printErrorAndExit print error message and exit from utility
-func printErrorAndExit(f string, a ...interface{}) {
-	terminal.Error(f, a...)
-	shutdown(1)
-}
-
-// shutdown close connection to Redis and exit from utility
-func shutdown(code int) {
+// signalHandler is signal handler
+func signalHandler() {
 	if conn != nil {
 		conn.Close()
 	}
@@ -532,24 +541,49 @@ func shutdown(code int) {
 		outputWriter.Flush()
 	}
 
-	os.Exit(code)
+	os.Exit(1)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// getRedisVersionInfo returns info about Redis version
-func getRedisVersionInfo() support.App {
-	cmd := exec.Command("redis-server", "--version")
+// getServerVersionInfo returns info about Redis version
+func getServerVersionInfo() support.App {
+	var cmd *exec.Cmd
+	var name, ver string
+
+	switch {
+	case hasApp("valkey-server"):
+		name = "Valkey"
+		cmd = exec.Command("valkey-server", "--version")
+	case hasApp("redis-server"):
+		name = "Redis"
+		cmd = exec.Command("redis-server", "--version")
+	default:
+		return support.App{}
+	}
+
 	output, err := cmd.Output()
 
 	if err != nil {
-		return support.App{"Redis", ""}
+		return support.App{}
 	}
 
-	ver := strutil.ReadField(string(output), 2, false, ' ')
+	switch name {
+	case "Redis":
+		ver = strutil.ReadField(string(output), 2, false, ' ')
+	case "Valkey":
+		ver = strutil.ReadField(string(output), 1, false, ' ')
+	}
+
 	ver = strings.TrimLeft(ver, "v=")
 
-	return support.App{"Redis", ver}
+	return support.App{name, ver}
+}
+
+// hasApp returns true if given app is installed on the system
+func hasApp(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
 }
 
 // printCompletion prints completion for given shell
@@ -598,12 +632,12 @@ func genUsage() *usage.Info {
 
 	info.AddExample(
 		"-h 192.168.0.123 -p 6821 -t 15",
-		"Start monitoring instance on 192.168.0.123:6821 with 15 second timeout",
+		"Start monitoring the instance at 192.168.0.123:6821 with a 15-second intervals",
 	)
 
 	info.AddExample(
-		"-c -i 15 -o latency.csv",
-		"Start connection latency monitoring with 15 second interval and save result to CSV file",
+		"-C -i 15 -o latency.csv",
+		"Start monitoring connection latency with a 15-second intervals and save the results to a CSV file",
 	)
 
 	return info
