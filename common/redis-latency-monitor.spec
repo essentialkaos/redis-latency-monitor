@@ -6,7 +6,7 @@
 
 Summary:         Tiny Redis client for latency measurement
 Name:            redis-latency-monitor
-Version:         3.2.3
+Version:         3.3.0
 Release:         0%{?dist}
 Group:           Applications/System
 License:         Apache License, Version 2.0
@@ -19,6 +19,7 @@ BuildRoot:       %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:   golang >= 1.21
 
 Provides:        %{name} = %{version}-%{release}
+Provides:        valkey-latency-monitor = %{version}-%{release}
 
 ################################################################################
 
@@ -92,6 +93,12 @@ fi
 ################################################################################
 
 %changelog
+* Mon May 12 2025 Anton Novojilov <andy@essentialkaos.com> - 3.3.0-0
+- Improved Valkey support
+- UI improvements
+- Code refactoring
+- Dependencies update
+
 * Sun Jun 23 2024 Anton Novojilov <andy@essentialkaos.com> - 3.2.3-0
 - Code refactoring
 - Dependencies update

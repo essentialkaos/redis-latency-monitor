@@ -38,6 +38,10 @@ sudo dnf install redis-latency-monitor
 
 You can download prebuilt binaries for Linux and macOS from [EK Apps Repository](https://apps.kaos.st/redis-latency-monitor/latest).
 
+```bash
+bash <(curl -fsSL https://apps.kaos.st/get) redis-latency-monitor
+```
+
 ### Usage
 
 <img src=".github/images/usage.svg" />
