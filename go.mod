@@ -2,7 +2,7 @@ module github.com/essentialkaos/redis-latency-monitor
 
 go 1.23.8
 
-require github.com/essentialkaos/ek/v13 v13.28.0
+require github.com/essentialkaos/ek/v13 v13.28.1
 
 require (
 	github.com/essentialkaos/depsy v1.3.1 // indirect
