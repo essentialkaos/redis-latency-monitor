@@ -26,8 +26,8 @@ import (
 	"github.com/essentialkaos/ek/v13/mathutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/signal"
-	"github.com/essentialkaos/ek/v13/strutil"
 	"github.com/essentialkaos/ek/v13/support"
+	"github.com/essentialkaos/ek/v13/support/apps"
 	"github.com/essentialkaos/ek/v13/support/deps"
 	"github.com/essentialkaos/ek/v13/terminal"
 	"github.com/essentialkaos/ek/v13/terminal/tty"
@@ -47,7 +47,7 @@ import (
 // App info
 const (
 	APP  = "Redis Latency Monitor"
-	VER  = "3.3.0"
+	VER  = "3.3.1"
 	DESC = "Tiny Valkey/Redis client for latency measurement"
 )
 
@@ -548,36 +548,22 @@ func signalHandler() {
 
 // getServerVersionInfo returns info about Redis version
 func getServerVersionInfo() support.App {
-	var cmd *exec.Cmd
-	var name, ver string
+	var info support.App
 
 	switch {
 	case hasApp("valkey-server"):
-		name = "Valkey"
-		cmd = exec.Command("valkey-server", "--version")
+		info = apps.ExtractVersion("valkey-server --version", 0, 1)
+		info.Name = "Valkey"
 	case hasApp("redis-server"):
-		name = "Redis"
-		cmd = exec.Command("redis-server", "--version")
+		info = apps.ExtractVersion("redis-server --version", 0, 2)
+		info.Name = "Redis"
 	default:
 		return support.App{}
 	}
 
-	output, err := cmd.Output()
+	info.Version = strings.TrimLeft(info.Version, "v=")
 
-	if err != nil {
-		return support.App{}
-	}
-
-	switch name {
-	case "Redis":
-		ver = strutil.ReadField(string(output), 2, false, ' ')
-	case "Valkey":
-		ver = strutil.ReadField(string(output), 1, false, ' ')
-	}
-
-	ver = strings.TrimLeft(ver, "v=")
-
-	return support.App{name, ver}
+	return info
 }
 
 // hasApp returns true if given app is installed on the system
